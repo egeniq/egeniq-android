@@ -6,6 +6,8 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.egeniq.utils.net.HTTPClient;
+
 import android.util.Log;
 import ch.boye.httpclientandroidlib.Header;
 import ch.boye.httpclientandroidlib.HttpEntity;

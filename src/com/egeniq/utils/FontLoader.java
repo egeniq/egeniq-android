@@ -1,4 +1,4 @@
-package com.egeniq.widget;
+package com.egeniq.utils;
 
 import java.lang.ref.SoftReference;
 import java.util.Hashtable;

@@ -1,5 +1,7 @@
 package com.egeniq.utils.api;
 
+import com.egeniq.utils.net.HTTPException;
+
 
 /**
  * API exception.

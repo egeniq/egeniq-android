@@ -1,4 +1,4 @@
-package com.egeniq.utils.api;
+package com.egeniq.utils.net;
 
 /**
  * API exception.

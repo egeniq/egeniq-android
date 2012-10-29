@@ -1,4 +1,4 @@
-package com.egeniq.utils.api;
+package com.egeniq.utils.net;
 
 import java.io.BufferedReader;
 import java.io.IOException;
