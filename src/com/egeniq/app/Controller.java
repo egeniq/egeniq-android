@@ -319,7 +319,7 @@ public abstract class Controller {
     private void _createView() {
         FrameLayout wrapper = (FrameLayout)getView();
         View view = _onCreateView(LayoutInflater.from(getContext()));
-        wrapper.addView(view, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT));
+        wrapper.addView(view, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.FILL_PARENT, FrameLayout.LayoutParams.FILL_PARENT));
         _onViewCreated(view);
     }
 
