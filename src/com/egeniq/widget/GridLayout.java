@@ -232,11 +232,6 @@ public class GridLayout extends ViewGroup {
      * @Override
      */
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.UNSPECIFIED || 
-            MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.UNSPECIFIED) {
-            throw new IllegalArgumentException("Layout must be constrained on both axises");
-        }
-
         int paddingLeft = getPaddingLeft();
         int paddingTop = getPaddingTop();
         int paddingRight = getPaddingRight();
