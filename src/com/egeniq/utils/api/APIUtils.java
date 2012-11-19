@@ -36,9 +36,9 @@ public class APIUtils {
 
     public static long getLong(JSONObject object, String key, int fallback) {
     	try {
-    		return object.isNull(key) ? fallback : object.getLong(key);
+            return object.isNull(key) ? fallback : object.getLong(key);
     	} catch (JSONException e) {
-    		return fallback;
+    	    return fallback;
     	}
     }
     
