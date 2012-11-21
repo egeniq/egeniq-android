@@ -1,4 +1,4 @@
-package com.egeniq.app;
+package com.egeniq.support.app;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 /**
- * Controller base class.
+ * Controller base class when using the support library.
  * 
  * Controllers are a lot similar to fragments with the following main differences:
  * - Controllers can be nested inside other controllers.

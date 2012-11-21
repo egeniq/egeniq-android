@@ -1,21 +1,19 @@
-package com.egeniq.app;
+package com.egeniq.support.app;
 
 import java.util.ArrayList;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.egeniq.app.Controller.State;
+import com.egeniq.support.app.Controller.State;
 
 /**
- * Fragment base.
+ * Fragment base class when using the support library.
  */
-@TargetApi(11)
-public class Fragment extends android.app.Fragment {
+public class Fragment extends android.support.v4.app.Fragment {
     private final ArrayList<Controller> _controllers = new ArrayList<Controller>();
     private State _state = State.INITIAL;
     
