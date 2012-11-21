@@ -1,16 +1,18 @@
 package com.egeniq.utils.api;
 
-import com.egeniq.utils.net.HTTPException;
-
-
 /**
  * API exception.
  */
-public class APIException extends HTTPException {
+public class APIException extends Exception {
     /**
-     * Unique identifier.
+     * Unique identifier. 
      */
-    private final static long serialVersionUID = -882638141537688701L;
+    private static final long serialVersionUID = 6047699912655048829L;
+    
+    /**
+     * Error code.
+     */
+    private final String _code;
 
     /**
      * Constructs an unknown API exception.
@@ -43,7 +45,16 @@ public class APIException extends HTTPException {
      * @param message Error message.
      */
     public APIException(String code, String message, Throwable parent) {
-        super(code, message, parent);
+        super(message, parent);
+        _code = code;
     }
-    
+
+    /**
+     * Returns the error code.
+     * 
+     * @return Error code.
+     */
+    public String getCode() {
+        return _code;
+    }   
 }

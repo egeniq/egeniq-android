@@ -6,8 +6,6 @@ import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.egeniq.utils.net.HTTPClient;
-
 import android.util.Log;
 import ch.boye.httpclientandroidlib.Header;
 import ch.boye.httpclientandroidlib.HttpEntity;
@@ -18,10 +16,12 @@ import ch.boye.httpclientandroidlib.client.methods.HttpGet;
 import ch.boye.httpclientandroidlib.client.methods.HttpPost;
 import ch.boye.httpclientandroidlib.client.methods.HttpRequestBase;
 
+import com.egeniq.utils.net.AbstractHTTPClient;
+
 /**
  * Simple API client.
  */
-public class APIClient extends HTTPClient {
+public class APIClient extends AbstractHTTPClient {
     /**
      * Specifies the expected response type of an API request.
      */
@@ -29,66 +29,19 @@ public class APIClient extends HTTPClient {
         JSONObject,
         JSONArray
     }
-    
-    private String _baseURL;
-    private String _secureBaseURL;
 
     /**
      * Constructor.
      */
     public APIClient(String baseURL) {
-        this(baseURL, baseURL);
+        super(baseURL);
     }
     
     /**
      * Constructor.
      */
     public APIClient(String baseURL, String secureBaseURL) {
-        _baseURL = baseURL;
-        _secureBaseURL = secureBaseURL;
-    }
-    
-    /**
-     * Returns the (secure?) base URL.
-     * 
-     * @param useSSL When true returns the secure base URL, else the default base URL.
-     * 
-     * @return base URL
-     */
-    protected String _getBaseURL(boolean useSSL) {
-        return useSSL ? _secureBaseURL : _baseURL;
-    }
-
-    /**
-     * Sets the base URLs.
-     * 
-     * @param baseURL
-     * @param secureBaseURL
-     */
-    protected void _setBaseURLs(String baseURL, String secureBaseURL) {
-        _baseURL = baseURL;
-        _secureBaseURL = secureBaseURL;
-    }    
-    
-    /**
-     * Creates the full URL for the given location. 
-     * 
-     * Prepends the correct base URL (based on the useSSL) option unless the given location
-     * itself is already a full HTTP URL.
-     * 
-     * @param location Location.
-     * @param useSSL   Use SSL?
-     * 
-     * @return Full URL. 
-     */
-    protected String _getURL(String location, boolean useSSL) {
-        if (location == null) {
-            return _getBaseURL(useSSL);
-        } else if (location.toLowerCase().startsWith("http:") || location.toLowerCase().startsWith("https:")) {
-            return location;
-        } else {
-            return _getBaseURL(useSSL) + "/" + location;
-        }
+        super(baseURL, secureBaseURL);
     }
     
     /**

@@ -1,175 +1,239 @@
 package com.egeniq.utils.net;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.net.ConnectException;
+import java.util.concurrent.TimeUnit;
 
 import android.util.Log;
+import ch.boye.httpclientandroidlib.Header;
 import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.HttpResponse;
-import ch.boye.httpclientandroidlib.HttpVersion;
-import ch.boye.httpclientandroidlib.client.ClientProtocolException;
 import ch.boye.httpclientandroidlib.client.HttpClient;
+import ch.boye.httpclientandroidlib.client.methods.HttpDelete;
 import ch.boye.httpclientandroidlib.client.methods.HttpGet;
-import ch.boye.httpclientandroidlib.impl.client.DefaultHttpClient;
-import ch.boye.httpclientandroidlib.impl.conn.tsccm.ThreadSafeClientConnManager;
-import ch.boye.httpclientandroidlib.params.BasicHttpParams;
-import ch.boye.httpclientandroidlib.params.CoreProtocolPNames;
-import ch.boye.httpclientandroidlib.params.HttpConnectionParams;
-import ch.boye.httpclientandroidlib.params.HttpParams;
-import ch.boye.httpclientandroidlib.util.EntityUtils;
+import ch.boye.httpclientandroidlib.client.methods.HttpPost;
+import ch.boye.httpclientandroidlib.client.methods.HttpRequestBase;
 
 /**
- * HTTP client.
+ * Simple HTTP client.
  */
-public class HTTPClient {
-    private final static int DEFAULT_TIMEOUT = 15000;
-    
-    private int _timeout = DEFAULT_TIMEOUT;
-
-    private static HttpClient _httpClient = null;
-
-    private String _loggingTag = getClass().getName();
-    private boolean _loggingEnabled = false;
-    
+public class HTTPClient extends AbstractHTTPClient {
     /**
-     * Is logging enabled?
+     * Constructor.
      */
-    protected boolean _isLoggingEnabled() {
-        return _loggingEnabled;
+    public HTTPClient(String baseURL) {
+        super(baseURL);
     }
-    
+
     /**
-     * Enable / disable logging.
+     * Constructor.
+     */    
+    public HTTPClient(String baseURL, String secureBaseURL) {
+        super(baseURL, secureBaseURL);
+    }
+
+    /**
+     * Performs a GET request to the given location (which is appended to the base URL) 
+     * and returns the result as a JSON object.
+     * 
+     * Doesn't use SSL.
+     * 
+     * @param location Location.
+     * 
+     * @return Object.
      */
-    protected void _setLoggingEnabled(boolean loggingEnabled) {
-        _loggingEnabled = loggingEnabled;
+    public String get(String location) throws HTTPException {
+        return get(location, false, null);
     }    
     
     /**
-     * Returns the logging tag.
+     * Performs a GET request to the given location (which is appended to the base URL) 
+     * and returns the result as a JSON object.
+     * 
+     * @param location Location.
+     * @param useSSL   Use SSL when available.
+     * 
+     * @return Object.
      */
-    protected String _getLoggingTag() {
-        return _loggingTag;
-    }
-    
-    /**
-     * Sets the logging tag.
-     */
-    protected void _setLoggingTag(String tag) {
-        _loggingTag = tag;
-    }
-    
-    /**
-     * Returns the default http request parameters.
-     */
-    protected HttpParams _getDefaultParams() {
-        HttpParams params = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(params, _timeout);
-        HttpConnectionParams.setSoTimeout(params, _timeout);
-        HttpConnectionParams.setSoKeepalive(params, true);
-        return params;
-    }
-    
-    /**
-     * Get the currently set timeout.
-     */
-    public int getTimeout() {
-        return _timeout;
+    public String get(String location, boolean useSSL) throws HTTPException {
+        return get(location, useSSL, null);
     }
 
     /**
-     * Set a new timeout value
+     * Performs a GET request to the given location (which is appended to the base URL) 
+     * and returns the result as a JSON object.
+     * 
+     * @param location Location.
+     * @param useSSL   Use SSL when available.
+     * @param headers  HTTP headers.
+     * 
+     * @return Object.
      */
-    public void setTimeout(int timeout) {
-        _timeout = timeout;
+    public String get(String location, boolean useSSL, Header[] headers) throws HTTPException {
+        HttpGet httpGet = new HttpGet(_getURL(location, useSSL));
+
+        if (headers != null) {
+            for (Header header : headers) {
+                httpGet.addHeader(header);
+            }
+        }          
+        
+        if (_isLoggingEnabled()) {
+            Log.d(_getLoggingTag(), "Fetch JSON object: " + httpGet.getURI());
+        }
+        
+        return _executeAPIRequest(httpGet);
+    }
+    
+    /**
+     * Performs a POST request to the given location (which is appended to the base URL) 
+     * and returns the result as a JSON object..
+     * 
+     * @param location Location.
+     * @param entity   Post entity.
+     */
+    public String post(String location, HttpEntity entity) throws HTTPException {
+        return post(location, entity, false, null);
     }    
     
     /**
-     * Performs a GET request to the given location (which is appended to the base URL) and 
-     * returns the result as a string.
+     * Performs a POST request to the given location (which is appended to the base URL) 
+     * and returns the result as a JSON object..
+     * 
+     * @param location Location.
+     * @param entity   Post entity.
+     * @param useSSL   Use SSL when available.
      */
-    public String fetch(String location) throws HTTPException {
-        HttpGet httpGet = new HttpGet(location);
-        httpGet.setParams(_getDefaultParams());
+    public String post(String location, HttpEntity entity, boolean useSSL) throws HTTPException {
+        return post(location, entity, useSSL, null);
+    }
+
+    /**
+     * Performs a POST request to the given location (which is appended to the base URL) 
+     * and returns the result as a JSON object..
+     * 
+     * @param location Location.
+     * @param entity   Post entity.
+     * @param useSSL   Use SSL when available.
+     * @param headers  Headers.
+     * 
+     * @return Object.
+     */
+    public String post(String location, HttpEntity entity, boolean useSSL, Header[] headers) throws HTTPException {
+        HttpPost httpPost = new HttpPost(_getURL(location, useSSL));
+
+        if (headers != null) {
+            for (Header header : headers) {
+                httpPost.addHeader(header);
+            }
+        }
+
+        if (entity != null) {
+            httpPost.setEntity(entity);
+        }
 
         if (_isLoggingEnabled()) {
-            Log.d(_getLoggingTag(), "Fetch response: " + httpGet.getURI());
+            Log.d(_getLoggingTag(), "Post: " + httpPost.getURI());
         }
+        
+        return _executeAPIRequest(httpPost);
+    }
+    
+    /**
+     * Performs a DELETE request to the given location (which is appended to the base URL) 
+     * and returns the result as a JSON object.
+     * 
+     * @param location Location.
+     * 
+     * @return Object.
+     */
+    public String delete(String location) throws HTTPException {
+        return delete(location, false, null);
+    }
+    
+    /**
+     * Performs a DELETE request to the given location (which is appended to the base URL) 
+     * and returns the result as a JSON object.
+     * 
+     * @param location Location.
+     * @param useSSL   Use SSL when available.
+     * 
+     * @return Object.
+     */
+    public String delete(String location, boolean useSSL) throws HTTPException {
+        return delete(location, useSSL, null);
+    }    
 
-        HttpClient client = _getClient();
+    /**
+     * Performs a DELETE request to the given location (which is appended to the base URL) 
+     * and returns the result as a JSON object.
+     * 
+     * @param location Location.
+     * @param useSSL   Use SSL when available.
+     * @param headers  Headers.
+     * 
+     * @return Object.
+     */
+    public String delete(String location, boolean useSSL, Header[] headers) throws HTTPException {
+        HttpDelete httpDelete = new HttpDelete(_getURL(location, useSSL));
 
-        HttpResponse response;
-        String responseBody;
-
-        try {
-            response = client.execute(httpGet);
-            responseBody = _getResponseBody(response);
-            
-            if (_isLoggingEnabled()) {
-                Log.v(_getLoggingTag(), "Response body (" + httpGet.getURI() + "): " + responseBody);
+        if (headers != null) {
+            for (Header header : headers) {
+                httpDelete.addHeader(header);
             }
-        } catch (ClientProtocolException e) {
-            throw new HTTPException();
-        } catch (IOException e) {
-            throw new HTTPException();
         }
 
-        return responseBody;
+        if (_isLoggingEnabled()) {
+            Log.d(_getLoggingTag(), "Delete: " + httpDelete.getURI());
+        }
+        
+        return _executeAPIRequest(httpDelete);
     }
 
     /**
-     * Creates a HTTP client object.
+     * Executes an API request that has been fully configured. An expected response type must be specified.
+     *
+     * Handles response processing and error handling in a uniform way.
      */
-    protected synchronized static HttpClient _getClient() {
-        if (_httpClient == null) {
-            ThreadSafeClientConnManager connectionManager = new ThreadSafeClientConnManager();
-            connectionManager.setDefaultMaxPerRoute(10);
-            connectionManager.setMaxTotal(100);
-            HttpParams params = new BasicHttpParams();
-            HttpConnectionParams.setConnectionTimeout(params, DEFAULT_TIMEOUT);
-            HttpConnectionParams.setSoTimeout(params, DEFAULT_TIMEOUT);
-            HttpConnectionParams.setSoKeepalive(params, true);
-            _httpClient = new DefaultHttpClient(connectionManager, params);
-            _httpClient.getParams().setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+    protected String _executeAPIRequest(HttpRequestBase httpRequest) throws HTTPException {
+        try {
+            httpRequest.setParams(_getDefaultParams());
+            
+            HttpClient client = _getClient();
+            HttpResponse response = null;
+            
+            try {
+                response = client.execute(httpRequest);
+            } catch (ConnectException ex) {
+                // close idle connections to make sure the connect exception isn't
+                // caused by a stuck connection and try again
+                client.getConnectionManager().closeIdleConnections(0, TimeUnit.MILLISECONDS);
+                response = client.execute(httpRequest);
+            }
+            
+            String responseBody = _getResponseBody(response);
+
+            if (_isLoggingEnabled()) {
+                Log.v(_getLoggingTag(), "Response body: " + responseBody);
+            }
+            
+            if (response.getStatusLine().getStatusCode() >= 400) {
+                throw new HTTPException(response.getStatusLine().getStatusCode(), responseBody);
+            } else {
+                if (responseBody == null || responseBody.trim().length() == 0) {
+                    return null;
+                } else {
+                    return responseBody;
+                }
+            }
+        } catch (HTTPException e) {
+            // Re-throw HTTPExceptions.
+            throw e;
+        } catch (Exception e) {
+            if (_isLoggingEnabled()) {
+                Log.e(_getLoggingTag(), "Unexpected error", e);
+            }
+            
+            throw new HTTPException(e);
         }
-        
-        return _httpClient;
-    }
-
-    /**
-     * Gets the body of the HttpResponse as a String.
-     * 
-     * Returns null if response is null or if the body is empty.
-     * 
-     * @throws IOException
-     * @throws IllegalStateException
-     */
-    protected String _getResponseBody(HttpResponse response) throws IllegalStateException, IOException {
-        if (response == null) {
-            return null;
-        }
-
-        HttpEntity entity = response.getEntity();
-
-        if (entity == null) {
-            return null;
-        }
-
-        InputStream content = entity.getContent();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(content, Charset.forName("UTF-8")), 8192);
-        StringBuilder builder = new StringBuilder();
-
-        String line;
-        while ((line = reader.readLine()) != null) {
-            builder.append(line);
-        }
-
-        reader.close();
-        EntityUtils.consumeQuietly(entity);
-        
-        return builder.toString();
-    }
+    }  
 }

@@ -1,19 +1,18 @@
 package com.egeniq.utils.net;
 
 /**
- * API exception.
+ * HTTP exception.
  */
 public class HTTPException extends Exception {
-
     /**
-     * Unique identifier.
+     * Unique ID.
      */
-    private static final long serialVersionUID = -4389897353157210848L;
-
+    private static final long serialVersionUID = -6148048533520350702L;
+    
     /**
      * Error code.
      */
-    private String _code;
+    private final int _code;
 
     /**
      * Constructs an unknown HTTP exception.
@@ -26,7 +25,7 @@ public class HTTPException extends Exception {
      * Constructs an unknown HTTP exception.
      */
     public HTTPException(Throwable parent) {
-        this("unknown", "Unknown error", parent);
+        this(500, "Unknown error", parent);
     }
 
     /**
@@ -37,19 +36,17 @@ public class HTTPException extends Exception {
      * @param message
      *            Error message.
      */
-    public HTTPException(String code, String message) {
+    public HTTPException(int code, String message) {
         this(code, message, null);
     }
 
     /**
      * Constructs an HTTP exception with the given code and message.
      * 
-     * @param code
-     *            Error code.
-     * @param message
-     *            Error message.
+     * @param code Error code.
+     * @param message Error message.
      */
-    public HTTPException(String code, String message, Throwable parent) {
+    public HTTPException(int code, String message, Throwable parent) {
         super(message, parent);
         _code = code;
     }
@@ -57,9 +54,9 @@ public class HTTPException extends Exception {
     /**
      * Returns the error code.
      * 
-     * @return String err
+     * @return Error code.
      */
-    public String getCode() {
+    public int getCode() {
         return _code;
     }
 }
