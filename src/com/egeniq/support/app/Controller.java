@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 /**
@@ -29,7 +30,8 @@ public abstract class Controller {
     private Controller _parentController = null;
     private final ArrayList<Controller> _childControllers = new ArrayList<Controller>();
     private State _state = State.INITIAL;
-    private FrameLayout _view;
+    private View _innerView;
+    private FrameLayout _stubView;
     
     /**
      * Constructor.
@@ -247,11 +249,13 @@ public abstract class Controller {
      * @return component view
      */
     public final View getView() {
-        if (_view == null) {
-            _view = new FrameLayout(getContext());
+        if (_innerView != null) {
+            return _innerView;
+        } else if (_stubView == null) {
+            _stubView = new FrameLayout(getContext());
         }
         
-        return _view;
+        return _stubView;
     }
     
     /**
@@ -262,12 +266,7 @@ public abstract class Controller {
      * @return controller view
      */
     public final View getInnerView() {
-        if (_view == null) {
-            return null;
-        }
-        
-        FrameLayout layout = (FrameLayout)getView();
-        return layout.getChildCount() > 0 ? layout.getChildAt(0) : null;
+        return _innerView;
     }
     
     /**
@@ -317,10 +316,18 @@ public abstract class Controller {
      * Create the inner view for this controller.
      */
     private void _createView() {
-        FrameLayout wrapper = (FrameLayout)getView();
-        View view = _onCreateView(LayoutInflater.from(getContext()));
-        wrapper.addView(view, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.FILL_PARENT, FrameLayout.LayoutParams.FILL_PARENT));
-        _onViewCreated(view);
+        _innerView = _onCreateView(LayoutInflater.from(getContext()));
+        
+        if (_stubView != null && _stubView.getParent() instanceof ViewGroup) {
+            ViewGroup parent = (ViewGroup)_stubView.getParent();
+            int index = parent.indexOfChild(_stubView);
+            ViewGroup.LayoutParams params = _stubView.getLayoutParams();
+            parent.removeViewInLayout(_stubView);
+            parent.addView(_innerView, index, params);
+            _stubView = null;            
+        }
+        
+        _onViewCreated(_innerView);
     }
 
     /**
@@ -417,7 +424,8 @@ public abstract class Controller {
      */
     private void _destroyView() {   
         _onDestroyView();
-        _view = null;
+        _innerView = null;
+        _stubView = null;
     }
     
     /**
