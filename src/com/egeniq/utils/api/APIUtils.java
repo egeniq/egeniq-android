@@ -15,6 +15,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
+
 /**
  * Utility methods to deal with data retrieved from the API.
  */
@@ -26,7 +28,7 @@ public class APIUtils {
         _dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    public static int getInt(JSONObject object, String key, int fallback) {
+    public static Integer getInt(JSONObject object, String key, Integer fallback) {
         try {
             return object.isNull(key) ? fallback : object.getInt(key);
         } catch (JSONException e) {
@@ -34,7 +36,7 @@ public class APIUtils {
         }
     }
 
-    public static long getLong(JSONObject object, String key, long fallback) {
+    public static Long getLong(JSONObject object, String key, Long fallback) {
         try {
             return object.isNull(key) ? fallback : object.getLong(key);
         } catch (JSONException e) {
@@ -42,7 +44,7 @@ public class APIUtils {
         }
     }
     
-    public static double getDouble(JSONObject object, String key, double fallback) {
+    public static Double getDouble(JSONObject object, String key, Double fallback) {
         try {
             return object.isNull(key) ? fallback : object.getDouble(key);
         } catch (JSONException e) {
@@ -50,7 +52,7 @@ public class APIUtils {
         }
     }
     
-    public static float getFloat(JSONObject object, String key, float fallback) {
+    public static Float getFloat(JSONObject object, String key, Float fallback) {
         try {
             return object.isNull(key) ? fallback : Float.parseFloat(object.getString(key));
         } catch (JSONException e) {
@@ -58,8 +60,7 @@ public class APIUtils {
         }
     }
 
-
-    public static boolean getBoolean(JSONObject object, String key, boolean fallback) {
+    public static Boolean getBoolean(JSONObject object, String key, Boolean fallback) {
         try {
             return object.isNull(key) ? fallback : object.getBoolean(key);
         } catch (JSONException e) {
@@ -85,6 +86,7 @@ public class APIUtils {
         }
     }
 
+    @SuppressLint("DefaultLocale")
     public static <T extends Enum<T>> T getEnum(JSONObject object, String key, Class<T> enumType, T fallback) {
         try {
             return Enum.valueOf(enumType, getString(object, key, "").toUpperCase());
