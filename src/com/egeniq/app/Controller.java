@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
+
+import com.egeniq.widget.ControllerViewStub;
+import com.egeniq.widget.ControllerViewStub.OnReplaceListener;
 
 /**
  * Controller base class.
@@ -31,7 +33,7 @@ public abstract class Controller {
     private final ArrayList<Controller> _childControllers = new ArrayList<Controller>();
     private State _state = State.INITIAL;
     private View _innerView;
-    private FrameLayout _stubView;
+    private ControllerViewStub _viewStub;
     
     /**
      * Constructor.
@@ -251,11 +253,12 @@ public abstract class Controller {
     public final View getView() {
         if (_innerView != null) {
             return _innerView;
-        } else if (_stubView == null) {
-            _stubView = new FrameLayout(getContext());
+        } else if (_viewStub == null) {
+            _viewStub = new ControllerViewStub(getContext());
+            _viewStub.setBackgroundColor(Color.RED);
         }
         
-        return _stubView;
+        return _viewStub;
     }
     
     /**
@@ -318,14 +321,22 @@ public abstract class Controller {
     private void _createView() {
         _innerView = _onCreateView(LayoutInflater.from(getContext()));
         
-        if (_stubView != null && _stubView.getParent() instanceof ViewGroup) {
-            ViewGroup parent = (ViewGroup)_stubView.getParent();
-            int index = parent.indexOfChild(_stubView);
-            ViewGroup.LayoutParams params = _stubView.getLayoutParams();
-            parent.removeViewInLayout(_stubView);
-            parent.addView(_innerView, index, params);
-            _stubView = null;            
+        if (_innerView instanceof ControllerViewStub) {
+            ControllerViewStub innerViewStub = (ControllerViewStub)_innerView;
+            innerViewStub.addOnReplaceListener(new OnReplaceListener() {
+                @Override
+                public void onReplace(ControllerViewStub stub, View replacement) {
+                    _innerView = replacement;
+                }
+            });
         }
+        
+        
+        if (_viewStub != null) {
+            _viewStub.replace(_innerView);
+        }
+        
+        _viewStub = null;        
         
         _onViewCreated(_innerView);
     }
@@ -425,7 +436,7 @@ public abstract class Controller {
     private void _destroyView() {   
         _onDestroyView();
         _innerView = null;
-        _stubView = null;
+        _viewStub = null;
     }
     
     /**
