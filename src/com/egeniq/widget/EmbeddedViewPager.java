@@ -14,6 +14,7 @@ public class EmbeddedViewPager extends ViewPager {
      * Scroll start.
      */
     private float _startX = 0;
+    private boolean _isDragging = false;
     
     /**
      * Constructor.
@@ -34,8 +35,6 @@ public class EmbeddedViewPager extends ViewPager {
         super(context, attrs);
     }
     
-    boolean _isDragging = false;
-    
     /**
      * Intercept action down event. We might not get this event in our onTouchEvent if
      * there is a click listener on the view inside the scroll view.
@@ -46,6 +45,7 @@ public class EmbeddedViewPager extends ViewPager {
         if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
             getParent().requestDisallowInterceptTouchEvent(true); // stop parent from intercepting the motion event                   
             _startX = ev.getX();
+            _isDragging = false;
         }
         
         return super.onInterceptTouchEvent(ev);
@@ -55,17 +55,18 @@ public class EmbeddedViewPager extends ViewPager {
      * Handle touch event. Don't let parent intercept event if we can scroll ourselves.
      */
     public boolean onTouchEvent(MotionEvent ev) {
-        if (ev.getActionMasked() == MotionEvent.ACTION_MOVE) {
-            int deltaX = (int)(_startX - ev.getX());
-            int scrollX = getScrollX() + deltaX;
-            int width = getWidth();
-            
-            final float leftBound = Math.max(0, (getCurrentItem() - 1) * width);
-            final float rightBound = Math.min(getCurrentItem() + 1, getAdapter().getCount() - 1) * width;
-            if (scrollX == 0 || scrollX < leftBound || scrollX > rightBound) {
-                getParent().requestDisallowInterceptTouchEvent(false); // let parent take over                    
-                return false;
-            }     
+        if (!_isDragging && ev.getActionMasked() == MotionEvent.ACTION_MOVE) {
+            if (_startX != ev.getX()) {
+                int scrollX = getScrollX();
+                boolean result = super.onTouchEvent(ev);
+                if (scrollX != getScrollX()) {
+                    _isDragging = true;
+                    return result;
+                } else {
+                    getParent().requestDisallowInterceptTouchEvent(false); // let parent take over
+                    return false;
+                }
+            }
         }
         
         return super.onTouchEvent(ev);
