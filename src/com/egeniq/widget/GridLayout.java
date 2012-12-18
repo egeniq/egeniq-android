@@ -55,7 +55,7 @@ public class GridLayout extends ViewGroup {
          * @param columnSpan column span
          */
         public LayoutParams(int row, int rowSpan, int column, int columnSpan) {
-            super(FILL_PARENT, FILL_PARENT);
+            super(MATCH_PARENT, MATCH_PARENT);
             this.row = row;
             this.rowSpan = rowSpan;
             this.column = column;
@@ -232,6 +232,11 @@ public class GridLayout extends ViewGroup {
      * @Override
      */
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.UNSPECIFIED || MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.UNSPECIFIED) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            return;
+        }
+        
         int paddingLeft = getPaddingLeft();
         int paddingTop = getPaddingTop();
         int paddingRight = getPaddingRight();
