@@ -64,13 +64,13 @@ public class FontLoader {
 
         String name = "";
         switch (style) {
-            case 1:
+            case Typeface.BOLD:
                 name = String.format("%s-Bold.ttf", font);
                 break;
-            case 2:
+            case Typeface.BOLD_ITALIC:
                 name = String.format("%s-BoldItalic.ttf", font);
                 break;
-            case 3:
+            case Typeface.ITALIC:
                 name = String.format("%s-Italic.ttf", font);
                 break;
             default:
@@ -89,13 +89,13 @@ public class FontLoader {
         
         if (typeface == null) {
             switch (style) {
-                case 1:
+                case Typeface.BOLD:
                     name = String.format("%s-Bold.otf", font);
                     break;
-                case 2:
+                case Typeface.BOLD_ITALIC:
                     name = String.format("%s-BoldItalic.otf", font);
                     break;
-                case 3:
+                case Typeface.ITALIC:
                     name = String.format("%s-Italic.otf", font);
                     break;
                 default:
