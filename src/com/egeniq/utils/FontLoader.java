@@ -19,7 +19,7 @@ import android.widget.TextView;
  * - assets/fonts/
  * - assets/shared/fonts/
  * 
- * @author Ã–zcan Kaymak
+ * @author …zcan Kaymak
  */
 public class FontLoader {
     public static final String TAG = FontLoader.class.getName();
@@ -64,13 +64,13 @@ public class FontLoader {
 
         String name = "";
         switch (style) {
-            case 1:
+            case Typeface.BOLD:
                 name = String.format("%s-Bold.ttf", font);
                 break;
-            case 2:
+            case Typeface.BOLD_ITALIC:
                 name = String.format("%s-BoldItalic.ttf", font);
                 break;
-            case 3:
+            case Typeface.ITALIC:
                 name = String.format("%s-Italic.ttf", font);
                 break;
             default:
@@ -88,8 +88,49 @@ public class FontLoader {
         }
         
         if (typeface == null) {
+            switch (style) {
+                case Typeface.BOLD:
+                    name = String.format("%s-Bold.otf", font);
+                    break;
+                case Typeface.BOLD_ITALIC:
+                    name = String.format("%s-BoldItalic.otf", font);
+                    break;
+                case Typeface.ITALIC:
+                    name = String.format("%s-Italic.otf", font);
+                    break;
+                default:
+                    name = String.format("%s-Regular.otf", font);
+                    break;
+            }
+        }
+        
+        if (typeface == null) {
             if (DEBUG) {
-                Log.e(TAG, "Could not get typeface: " + name);
+                Log.e(TAG, "Could not get typeface: " + name + ". Retrying with regular style.");
+            }
+            
+            typeface = getFont(context, String.format("%s-Regular.otf", font));
+        }
+        
+        if (typeface == null) {
+            if (DEBUG) {
+                Log.e(TAG, "Could not get typeface: " + name + ". Retrying without applying style and presuming a ttf font.");
+            }
+            
+            typeface = getFont(context, String.format("%s.ttf", font));
+        }
+
+        if (typeface == null) {
+            if (DEBUG) {
+                Log.e(TAG, "Could not get typeface: " + name + ". Retrying without applying style and presuming a otf font.");
+            }
+            
+            typeface = getFont(context, String.format("%s.otf", font));
+        }
+        
+        if (typeface == null) {
+            if (DEBUG) {
+                Log.e(TAG, "Could not get typeface: " + font);
             }
                 
             return false;
