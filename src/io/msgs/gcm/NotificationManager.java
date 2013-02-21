@@ -1,155 +1,375 @@
 package io.msgs.gcm;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.msgs.gcm.Subscription.Time;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.util.Log;
+import ch.boye.httpclientandroidlib.HttpEntity;
+import ch.boye.httpclientandroidlib.NameValuePair;
+import ch.boye.httpclientandroidlib.client.entity.UrlEncodedFormEntity;
+import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
 
 import com.egeniq.BuildConfig;
+import com.egeniq.utils.api.APIClient;
+import com.egeniq.utils.api.APIException;
+import com.egeniq.utils.api.APIUtils;
 
 /**
  * Notification manager.
  */
 public class NotificationManager {
-    private final String TAG = NotificationManager.class.getSimpleName();
-    private final boolean DEBUG = BuildConfig.DEBUG;
+    private final static String TAG = NotificationManager.class.getSimpleName();
+    private final static boolean DEBUG = BuildConfig.DEBUG;
     
-    private final String NOTIFICATION_TOKEN_KEY = "notificationToken";
-    
+    private final static String NOTIFICATION_TOKEN_KEY = "notificationToken";
+    private final static String DEVICE_FAMILY = "android";
+
+    private final static SimpleDateFormat DATE_FORMAT;
+    static {
+        DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
     private final Context _context;
     private final String _serviceBaseURL;
-    
+    private final String _appId;
+
+    private APIClient _apiClient;
+
     /**
      * Constructor.
      * 
      * @param context
      * @param serviceBaseURL
      */
-    public NotificationManager(Context context, String serviceBaseURL) {
+    public NotificationManager(Context context, String serviceBaseURL, String appId) {
         _context = context;
         _serviceBaseURL = serviceBaseURL;
+        _appId = appId;
     }
-    
+
+    /**
+     * Returns the API client.
+     * 
+     * @return API client.
+     */
+    protected APIClient _getAPIClient() {
+        if (_apiClient == null) {
+            _apiClient = new APIClient(_serviceBaseURL);
+        }
+
+        return _apiClient;
+    }
+
     /**
      * Register device.
      * 
      * @param registrationId
      */
-    public void registerDevice(final String registrationId) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                try {
-                    String notificationToken = _getNotificationToken();
-                    
-                    HttpPost httpPost = new HttpPost(_serviceBaseURL + "/register");
-                    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-                    nameValuePairs.add(new BasicNameValuePair("deviceFamily", "android"));
-                    nameValuePairs.add(new BasicNameValuePair("deviceToken", registrationId));
-                    if (notificationToken != null) {
-                        nameValuePairs.add(new BasicNameValuePair("notificationToken", notificationToken));
-                    }
-
-                    httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
-
-                    if (DEBUG) {
-                        Log.d(TAG, "Send device registration request to " + httpPost.getURI());
-                        Log.d(TAG, "Registration ID: " + registrationId);
-                    }                    
-                    
-                    DefaultHttpClient httpClient = new DefaultHttpClient();
-                    HttpResponse httpResponse = httpClient.execute(httpPost);
-
-                    notificationToken = EntityUtils.toString(httpResponse.getEntity());
-                    
-                    if (DEBUG) {
-                        Log.d(TAG, "Notification token: " + notificationToken);
-                    }
-
-                    if (!"ERROR".equals(notificationToken)) {
-                        _setNotificationToken(notificationToken);
-                    }
-                } catch (Exception e) {
-                    if (DEBUG) {
-                        Log.e(TAG, "Error registering device for notifications", e);
-                    }
-                }
-
-                return null;
+    public void registerDevice(final String registrationId) throws APIException {
+        try {
+            if (DEBUG) {
+                Log.d(TAG, "Send device registration request for registration ID: " + registrationId);
             }
-        }.execute();         
+
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add(new BasicNameValuePair("appId", _appId));
+            params.add(new BasicNameValuePair("deviceFamily", DEVICE_FAMILY));
+            params.add(new BasicNameValuePair("deviceToken", registrationId));
+
+            String path = "subscribers";
+            String notificationToken = _getNotificationToken();
+            if (notificationToken != null) {
+                path = "subscribers/;update";
+                params.add(new BasicNameValuePair("notificationToken", notificationToken));
+            }
+
+            HttpEntity entity = new UrlEncodedFormEntity(params);
+            JSONObject result = _apiClient.post(path, entity);
+            notificationToken = APIUtils.getString(result, "notificationToken", null);
+            _setNotificationToken(notificationToken);
+
+            if (DEBUG) {
+                Log.d(TAG, "Notification token: " + notificationToken);
+            }
+        } catch (Exception e) {
+            if (DEBUG) {
+                Log.e(TAG, "Error registering device", e);
+            }
+
+            if (!(e instanceof APIException)) {
+                e = new APIException(e);
+            }
+
+            throw (APIException)e;
+        }
     }
-    
+
     /**
-     * Unregister device.
+     * Returns a list of subscriptions for this device.
      * 
-     * @param registrationId
+     * @return Subscriptions.
+     * 
+     * @throws APIException
      */
-    public void unregisterDevice(String registrationId) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                try {
-                    String notificationToken = _getNotificationToken();
-                    if (notificationToken == null) {
-                        return null;
-                    }
-                    
-                    _setNotificationToken(null);
-                    
-                    HttpPost httpPost = new HttpPost(_serviceBaseURL + "/unregister");
-                    List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
-                    nameValuePairs.add(new BasicNameValuePair("deviceFamily", "android"));
-                    nameValuePairs.add(new BasicNameValuePair("notificationToken", notificationToken));
+    public Subscription[] getSubscriptions() throws APIException {
+        try {
+            String notificationToken = _getNotificationToken();
+            if (notificationToken == null) {
+                throw new APIException("not_registered", "Device is not registered");
+            }
 
-                    httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs, HTTP.UTF_8));
+            JSONArray rawSubscriptions = _apiClient.getArray("subscriptions/" + _appId + "/" + notificationToken);
 
-                    if (DEBUG) {
-                        Log.d(TAG, "Send device unregister request to " + httpPost.getURI());
-                    }                    
-                    
-                    DefaultHttpClient httpClient = new DefaultHttpClient();
-                    httpClient.execute(httpPost);
-                } catch (Exception e) {
-                    if (DEBUG) {
-                        Log.e(TAG, "Error unregistering device for notifications", e);
+            ArrayList<Subscription> subscriptions = new ArrayList<Subscription>();
+            for (int i = 0; i < rawSubscriptions.length(); i++) {
+                JSONObject rawSubscription = rawSubscriptions.getJSONObject(i);
+
+                Subscription subscription = new Subscription();
+                subscription.setId(APIUtils.getInt(rawSubscription, "id", 0));
+                subscription.setChannelId(APIUtils.getString(rawSubscription, "channelId", ""));
+
+                String rawStartDate = APIUtils.getString(rawSubscription, "dateStart", null);
+                Date startDate = rawStartDate == null ? null : DATE_FORMAT.parse(rawStartDate);
+                String rawEndDate = APIUtils.getString(rawSubscription, "dateEnd", null);
+                Date endDate = rawEndDate == null ? null : DATE_FORMAT.parse(rawEndDate);
+                subscription.setDatePeriod(startDate, endDate);
+
+                String rawStartTime = APIUtils.getString(rawSubscription, "timeStart", null);
+                Time startTime = rawStartTime == null ? null : new Time(Integer.parseInt(rawStartTime.split(":")[0]), Integer.parseInt(rawStartTime.split(":")[1]));
+                String rawEndTime = APIUtils.getString(rawSubscription, "timeEnd", null);
+                Time endTime = rawEndTime == null ? null : new Time(Integer.parseInt(rawEndTime.split(":")[0]), Integer.parseInt(rawEndTime.split(":")[1]));
+                subscription.setTimePeriod(startTime, endTime);
+
+                int weekdays = 0;
+                String rawDowSet = APIUtils.getString(rawSubscription, "dowSet", "");
+                String[] rawDays = rawDowSet.split(",");
+                for (String rawDay : rawDays) {
+                    if (rawDay.equals("1")) {
+                        weekdays &= Subscription.SUNDAY;
+                    } else if (rawDay.equals("2")) {
+                        weekdays &= Subscription.MONDAY;
+                    } else if (rawDay.equals("3")) {
+                        weekdays &= Subscription.TUESDAY;
+                    } else if (rawDay.equals("4")) {
+                        weekdays &= Subscription.WEDNESDAY;
+                    } else if (rawDay.equals("5")) {
+                        weekdays &= Subscription.THURSDAY;
+                    } else if (rawDay.equals("6")) {
+                        weekdays &= Subscription.FRIDAY;
+                    } else if (rawDay.equals("7")) {
+                        weekdays &= Subscription.SATURDAY;
                     }
                 }
+                subscription.setWeekdays(weekdays);
 
-                return null;
+                subscriptions.add(subscription);
             }
-        }.execute();           
+
+            return subscriptions.toArray(new Subscription[0]);
+        } catch (Exception e) {
+            if (DEBUG) {
+                Log.e(TAG, "Error adding subscription", e);
+            }
+
+            if (!(e instanceof APIException)) {
+                e = new APIException(e);
+            }
+
+            throw (APIException)e;
+        }
     }
-    
+
+    /**
+     * Subscribe.
+     * 
+     * @param subscription
+     * 
+     * @throws APIException
+     */
+    public void subscribe(Subscription subscription) throws APIException {
+        try {
+            String notificationToken = _getNotificationToken();
+            if (notificationToken == null) {
+                throw new APIException("not_registered", "Device is not registered");
+            }
+
+            if (DEBUG) {
+                Log.d(TAG, "Add subscription for channel " + subscription.getChannelId());
+            }
+
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add(new BasicNameValuePair("appId", _appId));
+            params.add(new BasicNameValuePair("notificationToken", notificationToken));
+            params.add(new BasicNameValuePair("channelId", subscription.getChannelId()));
+
+            if (subscription.getStartDate() != null) {
+                params.add(new BasicNameValuePair("dateStart", DATE_FORMAT.format(subscription.getStartDate())));
+            }
+
+            if (subscription.getEndDate() != null) {
+                params.add(new BasicNameValuePair("dateEnd", DATE_FORMAT.format(subscription.getEndDate())));
+            }
+
+            if (subscription.getStartTime() != null) {
+                params.add(new BasicNameValuePair("timeStart", String.format("%02d:%02d", subscription.getStartTime().getHours(), subscription.getStartTime().getMinutes())));
+            }
+
+            if (subscription.getEndTime() != null) {
+                params.add(new BasicNameValuePair("timeEnd", String.format("%02d:%02d", subscription.getEndTime().getHours(), subscription.getEndTime().getMinutes())));
+            }
+
+            if (subscription.getWeekdays() > 0) {
+                String dowSet = "";
+                if (subscription.hasWeekday(Subscription.SUNDAY)) {
+                    dowSet += (dowSet.length() > 0 ? "," : "") + "1";
+                }
+                if (subscription.hasWeekday(Subscription.MONDAY)) {
+                    dowSet += (dowSet.length() > 0 ? "," : "") + "2";
+                }
+                if (subscription.hasWeekday(Subscription.TUESDAY)) {
+                    dowSet += (dowSet.length() > 0 ? "," : "") + "3";
+                }
+                if (subscription.hasWeekday(Subscription.WEDNESDAY)) {
+                    dowSet += (dowSet.length() > 0 ? "," : "") + "4";
+                }
+                if (subscription.hasWeekday(Subscription.THURSDAY)) {
+                    dowSet += (dowSet.length() > 0 ? "," : "") + "4";
+                }
+                if (subscription.hasWeekday(Subscription.FRIDAY)) {
+                    dowSet += (dowSet.length() > 0 ? "," : "") + "6";
+                }
+                if (subscription.hasWeekday(Subscription.SATURDAY)) {
+                    dowSet += (dowSet.length() > 0 ? "," : "") + "7";
+                }
+
+                params.add(new BasicNameValuePair("dowSet", dowSet));
+            }
+
+            HttpEntity entity = new UrlEncodedFormEntity(params);
+            JSONObject result = _apiClient.post("subscriptions", entity);
+            int id = APIUtils.getInt(result, "id", 0);
+            subscription.setId(id);
+
+            if (DEBUG) {
+                Log.d(TAG, "Subscription ID: " + id);
+            }
+        } catch (Exception e) {
+            if (DEBUG) {
+                Log.e(TAG, "Error adding subscription", e);
+            }
+
+            if (!(e instanceof APIException)) {
+                e = new APIException(e);
+            }
+
+            throw (APIException)e;
+        }
+    }
+
+    /**
+     * Unsubscribe from all subscriptions for the given channel.
+     * 
+     * @param channelId Channel ID.
+     */
+    public void unsubscribe(String channelId) throws APIException {
+        String notificationToken = _getNotificationToken();
+        if (notificationToken == null) {
+            throw new APIException("not_registered", "Device is not registered");
+        }
+
+        try {
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add(new BasicNameValuePair("appId", _appId));
+            params.add(new BasicNameValuePair("notificationToken", notificationToken));
+            params.add(new BasicNameValuePair("channelId", channelId));
+
+            HttpEntity entity = new UrlEncodedFormEntity(params);
+            _apiClient.post("subscriptions/;delete", entity);
+        } catch (Exception e) {
+            if (DEBUG) {
+                Log.e(TAG, "Error adding subscription", e);
+            }
+
+            if (!(e instanceof APIException)) {
+                e = new APIException(e);
+            }
+
+            throw (APIException)e;
+        }
+    }
+
+    /**
+     * Unsubscribe using the given subscription ID.
+     * 
+     * @param subscriptionId Subscription ID.
+     */
+    public void unsubscribe(int subscriptionId) throws APIException {
+        String notificationToken = _getNotificationToken();
+        if (notificationToken == null) {
+            throw new APIException("not_registered", "Device is not registered");
+        }
+
+        try {
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add(new BasicNameValuePair("appId", _appId));
+            params.add(new BasicNameValuePair("notificationToken", notificationToken));
+            params.add(new BasicNameValuePair("subscriptionId", String.valueOf(subscriptionId)));
+
+            HttpEntity entity = new UrlEncodedFormEntity(params);
+            _apiClient.post("subscriptions/;delete", entity);
+        } catch (Exception e) {
+            if (DEBUG) {
+                Log.e(TAG, "Error adding subscription", e);
+            }
+
+            if (!(e instanceof APIException)) {
+                e = new APIException(e);
+            }
+
+            throw (APIException)e;
+        }
+    }
+
+    /**
+     * Unsubscribe the given subscription (used the subscription ID).
+     * 
+     * @param subscription Subscription ID.
+     */
+    public void unsubscribe(Subscription subscription) throws APIException {
+        if (subscription.getId() != null) {
+            unsubscribe(subscription.getId());
+        }
+    }
+
     /**
      * Returns the current notification token.
      * 
      * @return Notification token.
      */
     private String _getNotificationToken() {
-        return _context.getSharedPreferences(TAG, Context.MODE_PRIVATE).getString(NOTIFICATION_TOKEN_KEY, null);
+        return _context.getSharedPreferences(TAG, Context.MODE_PRIVATE).getString(_appId + "." + NOTIFICATION_TOKEN_KEY, null);
     }
-    
+
     /**
      * Sets the new notificaction token.
      * 
      * @param notificationToken
      */
     private void _setNotificationToken(String notificationToken) {
-        SharedPreferences.Editor editor =  _context.getSharedPreferences(TAG, Context.MODE_PRIVATE).edit();        
-        editor.putString(NOTIFICATION_TOKEN_KEY, notificationToken);
+        SharedPreferences.Editor editor = _context.getSharedPreferences(TAG, Context.MODE_PRIVATE).edit();
+        editor.putString(_appId + "." + NOTIFICATION_TOKEN_KEY, notificationToken);
         editor.commit();
     }
 }
