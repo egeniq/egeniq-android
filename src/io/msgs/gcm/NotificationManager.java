@@ -27,6 +27,9 @@ import com.egeniq.utils.api.APIUtils;
 
 /**
  * Notification manager.
+ * 
+ * All methods are executed synchronously. You are yourself responsible for
+ * wrapping the calls in an AsyncTask or something similar.
  */
 public class NotificationManager {
     private final static String TAG = NotificationManager.class.getSimpleName();
@@ -71,13 +74,41 @@ public class NotificationManager {
 
         return _apiClient;
     }
-
+    
+    /**
+     * Is registered?
+     * 
+     * @return Is registered?
+     */
+    public boolean isRegistered() {
+        return getNotificationToken() != null;
+    }
+    
+    /**
+     * Returns the current notification token.
+     * 
+     * @return Notification token.
+     */
+    public String getNotificationToken() {
+        return _context.getSharedPreferences(TAG, Context.MODE_PRIVATE).getString(_appId + "." + NOTIFICATION_TOKEN_KEY, null);
+    }
+    
     /**
      * Register device.
      * 
      * @param registrationId
      */
     public void registerDevice(final String registrationId) throws APIException {
+        registerDevice(registrationId, null);
+    }
+
+    /**
+     * Register device and subscribe to the given channel.
+     * 
+     * @param registrationId
+     * @param channelId
+     */
+    public void registerDevice(final String registrationId, final String channelId) throws APIException {
         try {
             if (DEBUG) {
                 Log.d(TAG, "Send device registration request for registration ID: " + registrationId);
@@ -87,21 +118,31 @@ public class NotificationManager {
             params.add(new BasicNameValuePair("appId", _appId));
             params.add(new BasicNameValuePair("deviceFamily", DEVICE_FAMILY));
             params.add(new BasicNameValuePair("deviceToken", registrationId));
+            
+            if (channelId != null) {
+                params.add(new BasicNameValuePair("channelId", channelId));
+            }
 
             String path = "subscribers";
-            String notificationToken = _getNotificationToken();
+            String notificationToken = getNotificationToken();
             if (notificationToken != null) {
                 path = "subscribers/;update";
                 params.add(new BasicNameValuePair("notificationToken", notificationToken));
             }
 
             HttpEntity entity = new UrlEncodedFormEntity(params);
-            JSONObject result = _apiClient.post(path, entity);
-            notificationToken = APIUtils.getString(result, "notificationToken", null);
-            _setNotificationToken(notificationToken);
+            JSONObject result = _getAPIClient().post(path, entity);
+            if (notificationToken == null && result != null) {
+                notificationToken = APIUtils.getString(result, "notificationToken", null);
+                _setNotificationToken(notificationToken);
 
-            if (DEBUG) {
-                Log.d(TAG, "Notification token: " + notificationToken);
+                if (DEBUG) {
+                    Log.d(TAG, "Notification token: " + notificationToken);
+                }
+            } else if (notificationToken == null) {
+                if (DEBUG) {
+                    Log.e(TAG, "No notification token returned");
+                }
             }
         } catch (Exception e) {
             if (DEBUG) {
@@ -125,12 +166,12 @@ public class NotificationManager {
      */
     public Subscription[] getSubscriptions() throws APIException {
         try {
-            String notificationToken = _getNotificationToken();
+            String notificationToken = getNotificationToken();
             if (notificationToken == null) {
                 throw new APIException("not_registered", "Device is not registered");
             }
 
-            JSONArray rawSubscriptions = _apiClient.getArray("subscriptions/" + _appId + "/" + notificationToken);
+            JSONArray rawSubscriptions = _getAPIClient().getArray("subscriptions/" + _appId + "/" + notificationToken);
 
             ArrayList<Subscription> subscriptions = new ArrayList<Subscription>();
             for (int i = 0; i < rawSubscriptions.length(); i++) {
@@ -190,6 +231,17 @@ public class NotificationManager {
             throw (APIException)e;
         }
     }
+    
+    /**
+     * Subscribe.
+     * 
+     * @param channelId Channel ID.
+     * 
+     * @throws APIException
+     */
+    public void subscribe(String channelId) throws APIException {
+        subscribe(new Subscription().setChannelId(channelId));
+    }
 
     /**
      * Subscribe.
@@ -200,7 +252,7 @@ public class NotificationManager {
      */
     public void subscribe(Subscription subscription) throws APIException {
         try {
-            String notificationToken = _getNotificationToken();
+            String notificationToken = getNotificationToken();
             if (notificationToken == null) {
                 throw new APIException("not_registered", "Device is not registered");
             }
@@ -258,7 +310,7 @@ public class NotificationManager {
             }
 
             HttpEntity entity = new UrlEncodedFormEntity(params);
-            JSONObject result = _apiClient.post("subscriptions", entity);
+            JSONObject result = _getAPIClient().post("subscriptions", entity);
             int id = APIUtils.getInt(result, "id", 0);
             subscription.setId(id);
 
@@ -284,7 +336,7 @@ public class NotificationManager {
      * @param channelId Channel ID.
      */
     public void unsubscribe(String channelId) throws APIException {
-        String notificationToken = _getNotificationToken();
+        String notificationToken = getNotificationToken();
         if (notificationToken == null) {
             throw new APIException("not_registered", "Device is not registered");
         }
@@ -296,7 +348,7 @@ public class NotificationManager {
             params.add(new BasicNameValuePair("channelId", channelId));
 
             HttpEntity entity = new UrlEncodedFormEntity(params);
-            _apiClient.post("subscriptions/;delete", entity);
+            _getAPIClient().post("subscriptions/;delete", entity);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error adding subscription", e);
@@ -316,7 +368,7 @@ public class NotificationManager {
      * @param subscriptionId Subscription ID.
      */
     public void unsubscribe(int subscriptionId) throws APIException {
-        String notificationToken = _getNotificationToken();
+        String notificationToken = getNotificationToken();
         if (notificationToken == null) {
             throw new APIException("not_registered", "Device is not registered");
         }
@@ -328,7 +380,7 @@ public class NotificationManager {
             params.add(new BasicNameValuePair("subscriptionId", String.valueOf(subscriptionId)));
 
             HttpEntity entity = new UrlEncodedFormEntity(params);
-            _apiClient.post("subscriptions/;delete", entity);
+            _getAPIClient().post("subscriptions/;delete", entity);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error adding subscription", e);
@@ -351,15 +403,6 @@ public class NotificationManager {
         if (subscription.getId() != null) {
             unsubscribe(subscription.getId());
         }
-    }
-
-    /**
-     * Returns the current notification token.
-     * 
-     * @return Notification token.
-     */
-    private String _getNotificationToken() {
-        return _context.getSharedPreferences(TAG, Context.MODE_PRIVATE).getString(_appId + "." + NOTIFICATION_TOKEN_KEY, null);
     }
 
     /**

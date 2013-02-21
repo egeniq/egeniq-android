@@ -73,8 +73,9 @@ public class Subscription {
      * 
      * @param id ID.
      */
-    public void setId(Integer id) {
+    public Subscription setId(Integer id) {
         _id = id;
+        return this;
     }
     
     /**
@@ -91,8 +92,9 @@ public class Subscription {
      * 
      * @param channelId Channel ID.
      */
-    public void setChannelId(String channelId) {
+    public Subscription setChannelId(String channelId) {
         _channelId = channelId;
+        return this;
     }
     
     /**
@@ -119,9 +121,10 @@ public class Subscription {
      * @param startDate Start date.
      * @param endDate   End date.
      */
-    public void setDatePeriod(Date startDate, Date endDate) {
+    public Subscription setDatePeriod(Date startDate, Date endDate) {
         _startDate = startDate;
         _endDate = endDate;
+        return this;
     }
     
     /**
@@ -148,9 +151,10 @@ public class Subscription {
      * @param startTime Start time.
      * @param endTime   End time.
      */
-    public void setTimePeriod(Time startTime, Time endTime) {
+    public Subscription setTimePeriod(Time startTime, Time endTime) {
         _startTime = startTime;
         _endTime = endTime;
+        return this;
     }
     
     /**
@@ -178,7 +182,8 @@ public class Subscription {
      * 
      * @param weekdays Weekdays.
      */
-    public void setWeekdays(int weekdays) {
+    public Subscription setWeekdays(int weekdays) {
         _weekdays = weekdays;
+        return this;
     }
 }
