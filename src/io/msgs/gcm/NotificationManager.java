@@ -36,7 +36,7 @@ public class NotificationManager {
     private final static boolean DEBUG = BuildConfig.DEBUG;
     
     private final static String NOTIFICATION_TOKEN_KEY = "notificationToken";
-    private final static String DEVICE_FAMILY = "android";
+    private final static String DEVICE_FAMILY = "gcm";
 
     private final static SimpleDateFormat DATE_FORMAT;
     static {
