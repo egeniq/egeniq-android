@@ -154,7 +154,9 @@ public class NotificationManager {
                 }
             } 
             
-            Log.d(TAG, "Registration request processed");
+            if (DEBUG) {
+                Log.d(TAG, "Registration request processed");
+            }
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error registering device", e);
