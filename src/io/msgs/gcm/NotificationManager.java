@@ -126,12 +126,21 @@ public class NotificationManager {
             String path = "subscribers";
             String notificationToken = getNotificationToken();
             if (notificationToken != null) {
+                if (DEBUG) {
+                    Log.d(TAG, "Using existing notification token: " + notificationToken);
+                }
+                
                 path = "subscribers/;update";
                 params.add(new BasicNameValuePair("notificationToken", notificationToken));
             }
 
             HttpEntity entity = new UrlEncodedFormEntity(params);
             JSONObject result = _getAPIClient().post(path, entity);
+            
+            if (DEBUG) {
+                Log.d(TAG, "Registration request sent");
+            }
+            
             if (notificationToken == null && result != null) {
                 notificationToken = APIUtils.getString(result, "notificationToken", null);
                 _setNotificationToken(notificationToken);
@@ -143,7 +152,9 @@ public class NotificationManager {
                 if (DEBUG) {
                     Log.e(TAG, "No notification token returned");
                 }
-            }
+            } 
+            
+            Log.d(TAG, "Registration request processed");
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error registering device", e);
