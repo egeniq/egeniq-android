@@ -86,6 +86,16 @@ public class APIUtils {
         }
     }
 
+    public static Date getDate(JSONObject object, String key, Date fallback, SimpleDateFormat format) {
+        try {
+            return object.isNull(key) ? fallback : format.parse(object.getString(key));
+        } catch (JSONException e) {
+            return fallback;
+        } catch (ParseException e) {
+            return fallback;
+        }
+    }
+
     @SuppressLint("DefaultLocale")
     public static <T extends Enum<T>> T getEnum(JSONObject object, String key, Class<T> enumType, T fallback) {
         try {
