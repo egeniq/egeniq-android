@@ -77,18 +77,12 @@ public class APIUtils {
     }
 
     public static Date getDate(JSONObject object, String key, Date fallback) {
-        try {
-            return object.isNull(key) ? fallback : _dateFormat.parse(object.getString(key));
-        } catch (JSONException e) {
-            return fallback;
-        } catch (ParseException e) {
-            return fallback;
-        }
+        return getDate(object, key, fallback, null);
     }
 
     public static Date getDate(JSONObject object, String key, Date fallback, SimpleDateFormat format) {
         try {
-            return object.isNull(key) ? fallback : format.parse(object.getString(key));
+            return object.isNull(key) ? fallback : format == null ? _dateFormat.parse(object.getString(key)) : format.parse(object.getString(key));
         } catch (JSONException e) {
             return fallback;
         } catch (ParseException e) {
