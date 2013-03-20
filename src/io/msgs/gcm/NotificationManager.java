@@ -111,7 +111,7 @@ public class NotificationManager {
     public void registerDevice(final String registrationId, final String channelId) throws APIException {
         try {
             if (DEBUG) {
-                Log.d(TAG, "Send device registration request for registration ID: " + registrationId);
+                Log.d(TAG, "Send device registration request for registration ID: " + registrationId + " app ID: " + _appId);
             }
 
             List<NameValuePair> params = new ArrayList<NameValuePair>();
