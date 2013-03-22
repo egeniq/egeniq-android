@@ -27,7 +27,8 @@ public class APIClient extends AbstractHTTPClient {
      */
     protected enum ResponseType {
         JSONObject,
-        JSONArray
+        JSONArray,
+        XML
     }
 
     /**
@@ -150,6 +151,61 @@ public class APIClient extends AbstractHTTPClient {
         }
         
         return _executeJSONArrayAPIRequest(httpGet);
+    }
+    
+    /**
+     * Performs a GET request to the given location (which is appended to the base URL) 
+     * and returns the result as a XML string.
+     * 
+     * 
+     * @param location Location.
+     * 
+     * @return XML String.
+     */
+    public String getXML(String location) throws APIException {  
+        return getXML(location, false, null);
+    }
+    
+    
+    /**
+     * Performs a GET request to the given location (which is appended to the base URL) 
+     * and returns the result as a XML string.
+     * 
+     * 
+     * @param location Location.
+     * @param useSSL   Use SSL when available?
+     * 
+     * @return XML String.
+     */
+    public String getXML(String location, boolean useSSL) throws APIException {  
+        return getXML(location, useSSL, null);
+    }    
+
+    /**
+     * Performs a GET request to the given location (which is appended to the base URL) 
+     * and returns the result as a XML string.
+     * 
+     * 
+     * @param location Location.
+     * @param useSSL   Use SSL when available?
+     * @param headers  HTTP headers.
+     * 
+     * @return XML String.
+     */
+    public String getXML(String location, boolean useSSL, Header[] headers) throws APIException {
+        HttpGet httpGet = new HttpGet(_getURL(location, useSSL));
+        
+        if (headers != null) {
+            for (Header header : headers) {
+                httpGet.addHeader(header);
+            }
+        }        
+
+        if (_isLoggingEnabled()) {
+            Log.d(_getLoggingTag(), "Fetch XML: " + httpGet.getURI());
+        }
+        
+        return _executeXMLAPIRequest(httpGet);
     }
     
     /**
@@ -276,6 +332,15 @@ public class APIClient extends AbstractHTTPClient {
     }
 
     /**
+     * Executes an API request that has been fully configured with an expected XML response.
+     * 
+     * Handles response processing and error handling in a uniform way.
+     */
+    private String _executeXMLAPIRequest(HttpRequestBase httpRequest) throws APIException {
+        return (String)_executeAPIRequest(ResponseType.XML, httpRequest);
+    }
+    
+    /**
      * Executes an API request that has been fully configured. An expected response type must be specified.
      *
      * Handles response processing and error handling in a uniform way.
@@ -316,7 +381,8 @@ public class APIClient extends AbstractHTTPClient {
     
                     case JSONObject:
                         return new JSONObject(responseBody);
-    
+                    case XML:
+                        return responseBody;
                     default:
                         return null;
                 }
