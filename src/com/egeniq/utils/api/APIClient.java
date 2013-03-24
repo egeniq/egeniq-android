@@ -27,7 +27,8 @@ public class APIClient extends AbstractHTTPClient {
      */
     protected enum ResponseType {
         JSONObject,
-        JSONArray
+        JSONArray,
+        Raw
     }
 
     /**
@@ -150,6 +151,61 @@ public class APIClient extends AbstractHTTPClient {
         }
         
         return _executeJSONArrayAPIRequest(httpGet);
+    }
+    
+    /**
+     * Performs a GET request to the given location (which is appended to the base URL) 
+     * and returns the result as a string.
+     * 
+     * 
+     * @param location Location.
+     * 
+     * @return String.
+     */
+    public String getRaw(String location) throws APIException {  
+        return getRaw(location, false, null);
+    }
+    
+    
+    /**
+     * Performs a GET request to the given location (which is appended to the base URL) 
+     * and returns the result as a string.
+     * 
+     * 
+     * @param location Location.
+     * @param useSSL   Use SSL when available?
+     * 
+     * @return String.
+     */
+    public String getRaw(String location, boolean useSSL) throws APIException {  
+        return getRaw(location, useSSL, null);
+    }    
+
+    /**
+     * Performs a GET request to the given location (which is appended to the base URL) 
+     * and returns the result as a string.
+     * 
+     * 
+     * @param location Location.
+     * @param useSSL   Use SSL when available?
+     * @param headers  HTTP headers.
+     * 
+     * @return String.
+     */
+    public String getRaw(String location, boolean useSSL, Header[] headers) throws APIException {
+        HttpGet httpGet = new HttpGet(_getURL(location, useSSL));
+        
+        if (headers != null) {
+            for (Header header : headers) {
+                httpGet.addHeader(header);
+            }
+        }        
+
+        if (_isLoggingEnabled()) {
+            Log.d(_getLoggingTag(), "Fetch Raw: " + httpGet.getURI());
+        }
+        
+        return _executeRawAPIRequest(httpGet);
     }
     
     /**
@@ -276,6 +332,15 @@ public class APIClient extends AbstractHTTPClient {
     }
 
     /**
+     * Executes an API request that has been fully configured with an expected response.
+     * 
+     * Handles response processing and error handling in a uniform way.
+     */
+    private String _executeRawAPIRequest(HttpRequestBase httpRequest) throws APIException {
+        return (String)_executeAPIRequest(ResponseType.Raw, httpRequest);
+    }
+    
+    /**
      * Executes an API request that has been fully configured. An expected response type must be specified.
      *
      * Handles response processing and error handling in a uniform way.
@@ -316,7 +381,8 @@ public class APIClient extends AbstractHTTPClient {
     
                     case JSONObject:
                         return new JSONObject(responseBody);
-    
+                    case Raw:
+                        return responseBody;
                     default:
                         return null;
                 }
