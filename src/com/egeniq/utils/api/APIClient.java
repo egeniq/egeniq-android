@@ -28,7 +28,7 @@ public class APIClient extends AbstractHTTPClient {
     protected enum ResponseType {
         JSONObject,
         JSONArray,
-        XML
+        Raw
     }
 
     /**
@@ -155,44 +155,44 @@ public class APIClient extends AbstractHTTPClient {
     
     /**
      * Performs a GET request to the given location (which is appended to the base URL) 
-     * and returns the result as a XML string.
+     * and returns the result as a string.
      * 
      * 
      * @param location Location.
      * 
-     * @return XML String.
+     * @return String.
      */
-    public String getXML(String location) throws APIException {  
-        return getXML(location, false, null);
+    public String getRaw(String location) throws APIException {  
+        return getRaw(location, false, null);
     }
     
     
     /**
      * Performs a GET request to the given location (which is appended to the base URL) 
-     * and returns the result as a XML string.
+     * and returns the result as a string.
      * 
      * 
      * @param location Location.
      * @param useSSL   Use SSL when available?
      * 
-     * @return XML String.
+     * @return String.
      */
-    public String getXML(String location, boolean useSSL) throws APIException {  
-        return getXML(location, useSSL, null);
+    public String getRaw(String location, boolean useSSL) throws APIException {  
+        return getRaw(location, useSSL, null);
     }    
 
     /**
      * Performs a GET request to the given location (which is appended to the base URL) 
-     * and returns the result as a XML string.
+     * and returns the result as a string.
      * 
      * 
      * @param location Location.
      * @param useSSL   Use SSL when available?
      * @param headers  HTTP headers.
      * 
-     * @return XML String.
+     * @return String.
      */
-    public String getXML(String location, boolean useSSL, Header[] headers) throws APIException {
+    public String getRaw(String location, boolean useSSL, Header[] headers) throws APIException {
         HttpGet httpGet = new HttpGet(_getURL(location, useSSL));
         
         if (headers != null) {
@@ -202,10 +202,10 @@ public class APIClient extends AbstractHTTPClient {
         }        
 
         if (_isLoggingEnabled()) {
-            Log.d(_getLoggingTag(), "Fetch XML: " + httpGet.getURI());
+            Log.d(_getLoggingTag(), "Fetch Raw: " + httpGet.getURI());
         }
         
-        return _executeXMLAPIRequest(httpGet);
+        return _executeRawAPIRequest(httpGet);
     }
     
     /**
@@ -332,12 +332,12 @@ public class APIClient extends AbstractHTTPClient {
     }
 
     /**
-     * Executes an API request that has been fully configured with an expected XML response.
+     * Executes an API request that has been fully configured with an expected response.
      * 
      * Handles response processing and error handling in a uniform way.
      */
-    private String _executeXMLAPIRequest(HttpRequestBase httpRequest) throws APIException {
-        return (String)_executeAPIRequest(ResponseType.XML, httpRequest);
+    private String _executeRawAPIRequest(HttpRequestBase httpRequest) throws APIException {
+        return (String)_executeAPIRequest(ResponseType.Raw, httpRequest);
     }
     
     /**
@@ -381,7 +381,7 @@ public class APIClient extends AbstractHTTPClient {
     
                     case JSONObject:
                         return new JSONObject(responseBody);
-                    case XML:
+                    case Raw:
                         return responseBody;
                     default:
                         return null;
