@@ -263,6 +263,60 @@ public class APIClient extends AbstractHTTPClient {
     }
     
     /**
+     * Performs a POST request to the given location (which is appended to the base URL) 
+     * and returns the result raw string
+     * 
+     * @param location Location.
+     * @param entity   Post entity.
+     */
+    public String postRaw(String location, HttpEntity entity) throws APIException {
+        return postRaw(location, entity, false, null);
+    }    
+    
+    /**
+     * Performs a POST request to the given location (which is appended to the base URL) 
+     * and returns the result as a raw string
+     * 
+     * @param location Location.
+     * @param entity   Post entity.
+     * @param useSSL   Use SSL when available.
+     */
+    public String postRaw(String location, HttpEntity entity, boolean useSSL) throws APIException {
+        return postRaw(location, entity, useSSL, null);
+    }
+
+    /**
+     * Performs a POST request to the given location (which is appended to the base URL) 
+     * and returns the result as a raw string
+     * 
+     * @param location Location.
+     * @param entity   Post entity.
+     * @param useSSL   Use SSL when available.
+     * @param headers  Headers.
+     * 
+     * @return Object.
+     */
+    public String postRaw(String location, HttpEntity entity, boolean useSSL, Header[] headers) throws APIException {
+        HttpPost httpPost = new HttpPost(_getURL(location, useSSL));
+
+        if (headers != null) {
+            for (Header header : headers) {
+                httpPost.addHeader(header);
+            }
+        }
+
+        if (entity != null) {
+            httpPost.setEntity(entity);
+        }
+
+        if (_isLoggingEnabled()) {
+            Log.d(_getLoggingTag(), "Post: " + httpPost.getURI());
+        }
+        
+        return _executeRawAPIRequest(httpPost);
+    }
+    
+    /**
      * Performs a DELETE request to the given location (which is appended to the base URL) 
      * and returns the result as a JSON object.
      * 
