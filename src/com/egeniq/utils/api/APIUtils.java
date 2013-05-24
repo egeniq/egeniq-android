@@ -30,7 +30,7 @@ public class APIUtils {
 
     public static Integer getInt(JSONObject object, String key, Integer fallback) {
         try {
-            return object.isNull(key) ? fallback : object.getInt(key);
+            return !object.has(key) || object.isNull(key) ? fallback : Integer.valueOf(object.getInt(key));
         } catch (JSONException e) {
             return fallback;
         }
@@ -38,7 +38,7 @@ public class APIUtils {
 
     public static Long getLong(JSONObject object, String key, Long fallback) {
         try {
-            return object.isNull(key) ? fallback : object.getLong(key);
+            return !object.has(key) || object.isNull(key) ? fallback : Long.valueOf(object.getLong(key));
         } catch (JSONException e) {
             return fallback;
         }
@@ -46,7 +46,7 @@ public class APIUtils {
     
     public static Double getDouble(JSONObject object, String key, Double fallback) {
         try {
-            return object.isNull(key) ? fallback : object.getDouble(key);
+            return !object.has(key) || object.isNull(key) ? fallback : Double.valueOf(object.getDouble(key));
         } catch (JSONException e) {
             return fallback;
         }
@@ -54,7 +54,7 @@ public class APIUtils {
     
     public static Float getFloat(JSONObject object, String key, Float fallback) {
         try {
-            return object.isNull(key) ? fallback : Float.parseFloat(object.getString(key));
+            return !object.has(key) || object.isNull(key) ? fallback : Float.valueOf(Float.parseFloat(object.getString(key)));
         } catch (JSONException e) {
             return fallback;
         }
@@ -62,7 +62,7 @@ public class APIUtils {
 
     public static Boolean getBoolean(JSONObject object, String key, Boolean fallback) {
         try {
-            return object.isNull(key) ? fallback : object.getBoolean(key);
+            return !object.has(key) || object.isNull(key) ? fallback : Boolean.valueOf(object.getBoolean(key));
         } catch (JSONException e) {
             return fallback;
         }
@@ -70,7 +70,7 @@ public class APIUtils {
 
     public static String getString(JSONObject object, String key, String fallback) {
         try {
-            return object.isNull(key) ? fallback : object.getString(key);
+            return !object.has(key) || object.isNull(key) ? fallback : object.getString(key);
         } catch (JSONException e) {
             return fallback;
         }
@@ -82,7 +82,7 @@ public class APIUtils {
 
     public static Date getDate(JSONObject object, String key, Date fallback, SimpleDateFormat format) {
         try {
-            return object.isNull(key) ? fallback : format == null ? _dateFormat.parse(object.getString(key)) : format.parse(object.getString(key));
+            return !object.has(key) || object.isNull(key) ? fallback : format == null ? _dateFormat.parse(object.getString(key)) : format.parse(object.getString(key));
         } catch (JSONException e) {
             return fallback;
         } catch (ParseException e) {
@@ -101,7 +101,7 @@ public class APIUtils {
 
     public static JSONObject getObject(JSONObject object, String key, JSONObject fallback) {
         try {
-            return object.isNull(key) ? fallback : object.getJSONObject(key);
+            return !object.has(key) || object.isNull(key) ? fallback : object.getJSONObject(key);
         } catch (JSONException e) {
             return fallback;
         }
@@ -109,7 +109,7 @@ public class APIUtils {
 
     public static JSONArray getArray(JSONObject object, String key, JSONArray fallback) {
         try {
-            return object.isNull(key) ? fallback : object.getJSONArray(key);
+            return !object.has(key) || object.isNull(key) ? fallback : object.getJSONArray(key);
         } catch (JSONException e) {
             return fallback;
         }
@@ -117,7 +117,7 @@ public class APIUtils {
 
     public static String[] getStringArray(JSONObject object, String key, String[] fallback) {
         try {
-            if (object.isNull(key)) {
+            if (!object.has(key) || object.isNull(key)) {
                 return fallback;
             }
 
@@ -135,7 +135,7 @@ public class APIUtils {
     
     public static int[] getIntArray(JSONObject object, String key, int[] fallback) {
         try {
-            if (object.isNull(key)) {
+            if (!object.has(key) || object.isNull(key)) {
                 return fallback;
             }
 
