@@ -35,6 +35,9 @@ public class APIException extends Exception {
 
     /**
      * Constructs an unknown API exception.
+     * 
+     * @param responseCode HTTPResponse code
+     * @param parent       Throwable parent
      */
     public APIException(int responseCode, Throwable parent) {
         this("unknown", "Unknown error", responseCode, parent);
@@ -55,9 +58,21 @@ public class APIException extends Exception {
      * 
      * @param code    Error code.
      * @param message Error message.
+     * @param parent  Throwable parent
      */
     public APIException(String code, String message, Throwable parent) {
         this(code, message, 0, parent);
+    }
+    
+    /**
+     * Constructs an API exception with the given code and message.
+     * 
+     * @param code         Error code.
+     * @param message      Error message.
+     * @param responseCode HTTPResponse code.
+     */
+    public APIException(String code, String message, int responseCode) {
+        this(code, message, responseCode, null);
     }
     
     /**
