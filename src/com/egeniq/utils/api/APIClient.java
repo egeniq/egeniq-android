@@ -425,7 +425,7 @@ public class APIClient extends AbstractHTTPClient {
             if (response.getStatusLine().getStatusCode() >= 400) {
                 try {
                     JSONObject object = new JSONObject(responseBody);
-                    throw new APIException(object.getString("code"), object.getString("message"), response.getStatusLine().getStatusCode());
+                    throw new APIException(object.getString("code"), object.getString("message"), response.getStatusLine().getStatusCode(), null);
                 } catch (JSONException e) {
                     throw new APIException(response.getStatusLine().getStatusCode(), e);
                 }

@@ -56,8 +56,8 @@ public class APIException extends Exception {
      * @param code    Error code.
      * @param message Error message.
      */
-    public APIException(String code, String message, int responseCode) {
-        this(code, message, responseCode, null);
+    public APIException(String code, String message, Throwable parent) {
+        this(code, message, 0, parent);
     }
     
     /**
