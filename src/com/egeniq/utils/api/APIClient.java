@@ -427,7 +427,7 @@ public class APIClient extends AbstractHTTPClient {
                     JSONObject object = new JSONObject(responseBody);
                     throw new APIException(object.getString("code"), object.getString("message"), null, response.getStatusLine().getStatusCode());
                 } catch (JSONException e) {
-                    throw new APIException(e, response.getStatusLine().getStatusCode());
+                    throw new APIException(response.getStatusLine().getStatusCode(), e);
                 }
                 
             } else {
@@ -455,7 +455,7 @@ public class APIClient extends AbstractHTTPClient {
                 Log.e(_getLoggingTag(), "Unexpected error", e);
             }
             
-            throw new APIException(e);
+            throw new APIException(0, e);
         }
     }  
 }

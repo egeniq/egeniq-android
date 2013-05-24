@@ -23,20 +23,20 @@ public class APIException extends Exception {
      * Constructs an unknown API exception.
      */
     public APIException() {
-        this(null);
+        this(0);
     }
     
     /**
      * Constructs an unknown API exception.
      */
-    public APIException(Throwable parent) {
-        this(parent, 0);
+    public APIException(int responseCode) {
+        this(responseCode, null);
     }    
     
     /**
      * construct an unknown API Exception.
      */
-    public APIException(Throwable parent, int responseCode) {
+    public APIException(int responseCode, Throwable parent) {
         this("unknown", "Unknown error", parent, responseCode);
     }
     
