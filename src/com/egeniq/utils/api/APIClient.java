@@ -455,7 +455,7 @@ public class APIClient extends AbstractHTTPClient {
                 Log.e(_getLoggingTag(), "Unexpected error", e);
             }
             
-            throw new APIException(0, e);
+            throw new APIException(e);
         }
     }  
 }

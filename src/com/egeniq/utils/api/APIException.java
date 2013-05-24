@@ -23,14 +23,14 @@ public class APIException extends Exception {
      * Constructs an unknown API exception.
      */
     public APIException() {
-        this(0);
+        this(null);
     }
     
     /**
      * Constructs an unknown API exception.
      */
-    public APIException(int responseCode) {
-        this(responseCode, null);
+    public APIException(Throwable parent) {
+        this(0, parent);
     }    
     
     /**
