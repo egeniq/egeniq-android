@@ -4,6 +4,7 @@ import java.net.ConnectException;
 import java.util.concurrent.TimeUnit;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
@@ -422,8 +423,13 @@ public class APIClient extends AbstractHTTPClient {
             }
             
             if (response.getStatusLine().getStatusCode() >= 400) {
-                JSONObject object = new JSONObject(responseBody);
-                throw new APIException(object.getString("code"), object.getString("message"));
+                try {
+                    JSONObject object = new JSONObject(responseBody);
+                    throw new APIException(object.getString("code"), object.getString("message"), null, response.getStatusLine().getStatusCode());
+                } catch (JSONException e) {
+                    throw new APIException(e, response.getStatusLine().getStatusCode());
+                }
+                
             } else {
                 if (responseBody == null || responseBody.trim().length() == 0) {
                     return null;
