@@ -112,6 +112,11 @@ public class EllipsizingTextView extends TextView {
      */
     @Override
     protected void onDraw(Canvas canvas) {
+        if (getHeight() <= 0.0f || getLineHeight() <= 0.0f) {
+            super.onDraw(canvas);
+            return;
+        }
+        
         int lines = (int)Math.floor((float)getHeight() / (float)getLineHeight());
         if (_maxLines > 0 && _maxLines < lines) {
             lines = _maxLines;
