@@ -6,6 +6,8 @@ import java.util.Arrays;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +31,7 @@ public abstract class Controller {
     private final Context _context;
     private Bundle _arguments;
     private Fragment _fragment = null;
+    private DialogFragment _dialog = null;
     private Controller _parentController = null;
     private final ArrayList<Controller> _childControllers = new ArrayList<Controller>();
     private State _state = State.INITIAL;
@@ -82,8 +85,49 @@ public abstract class Controller {
     public void setFragment(Fragment fragment) {
         _fragment = fragment;
     }
-    
+
     /**
+     * Returns the dialogfragment this controller is part of.
+     * 
+     * The dialogfragment is based on the root controllers dialogfragment.
+     * 
+     * @return dialogfragment
+     */
+    public DialogFragment getDialogFragment() {
+        return isRootController() ? _dialog : getRootController().getDialogFragment();
+    }
+
+    /**
+     * Sets the dialogfragment this controller is part of.
+     * 
+     * @param dialog
+     */
+    public void setDialogFragment(DialogFragment dialog) {
+        _dialog = dialog;
+    }
+
+    /**
+     * Get the activity for the (dialog)fragment.
+     */
+    public FragmentActivity getActivity() {
+        if (_dialog != null) {
+            return getDialogFragment().getActivity();
+        }
+        
+        return getFragment().getActivity();
+    }
+
+    /**
+     * Get the FragmentManager for the (dialog)fragment.
+     */
+    public FragmentManager getFragmentManager() {
+        if (_dialog != null) {
+            return getDialogFragment().getFragmentManager();
+        }
+        
+        return getFragment().getFragmentManager();
+    }
+     /**
      * Is root controller?
      * 
      * @return Is root controller?
