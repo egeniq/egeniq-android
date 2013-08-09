@@ -104,6 +104,7 @@ public class FontLoader {
             }
         }
         
+        typeface = getFont(context, name);
         if (typeface == null) {
             if (DEBUG) {
                 Log.e(TAG, "Could not get typeface: " + name + ". Retrying with regular style.");
