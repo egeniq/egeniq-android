@@ -61,6 +61,8 @@ public class FontLoader {
         if (TextUtils.isEmpty(font)) {
             return false;
         }
+        
+        Typeface typeface = null;
 
         String name = "";
         switch (style) {
@@ -77,8 +79,8 @@ public class FontLoader {
                 name = String.format("%s-Regular.ttf", font);
                 break;
         }
+        typeface = getFont(context, name);
 
-        Typeface typeface = getFont(context, name);
         if (typeface == null) {
             if (DEBUG) {
                 Log.e(TAG, "Could not get typeface: " + name + ". Retrying with regular style.");
@@ -103,7 +105,8 @@ public class FontLoader {
                     break;
             }
         }
-        
+        typeface = getFont(context, name);
+
         if (typeface == null) {
             if (DEBUG) {
                 Log.e(TAG, "Could not get typeface: " + name + ". Retrying with regular style.");
