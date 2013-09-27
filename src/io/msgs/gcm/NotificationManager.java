@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.util.Log;
 import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.NameValuePair;
@@ -111,7 +112,7 @@ public class NotificationManager {
     public void registerDevice(final String registrationId, final String channelId) throws APIException {
         try {
             if (DEBUG) {
-                Log.d(TAG, "Send device registration request for registration ID: " + registrationId + " app ID: " + _appId);
+                Log.d(TAG, "Send device registration request for registration ID: " + Uri.encode(registrationId) + " app ID: " + Uri.encode(_appId));
             }
 
             List<NameValuePair> params = new ArrayList<NameValuePair>();
