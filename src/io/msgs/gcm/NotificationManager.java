@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.util.Log;
 import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.NameValuePair;
@@ -115,9 +116,9 @@ public class NotificationManager {
             }
 
             List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("appId", _appId));
+            params.add(new BasicNameValuePair("appId", Uri.encode(_appId)));
             params.add(new BasicNameValuePair("deviceFamily", DEVICE_FAMILY));
-            params.add(new BasicNameValuePair("deviceToken", registrationId));
+            params.add(new BasicNameValuePair("deviceToken", Uri.encode(registrationId)));
             
             if (channelId != null) {
                 params.add(new BasicNameValuePair("channelId", channelId));
