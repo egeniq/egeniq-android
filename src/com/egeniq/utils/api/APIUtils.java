@@ -93,7 +93,9 @@ public class APIUtils {
     @SuppressLint("DefaultLocale")
     public static <T extends Enum<T>> T getEnum(JSONObject object, String key, Class<T> enumType, T fallback) {
         try {
-            return Enum.valueOf(enumType, getString(object, key, "").toUpperCase());
+            String string = getString(object, key, "").toUpperCase();
+            string = string.replace("-", "_"); // e.g. release-tester -> release_tester
+            return Enum.valueOf(enumType, string);
         } catch (Exception e) {
             return fallback;
         }
