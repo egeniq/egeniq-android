@@ -13,7 +13,7 @@ public class Subscription {
     public static final int THURSDAY = 16;
     public static final int FRIDAY = 32;
     public static final int SATURDAY = 64;
-    
+
     /**
      * Time data type.
      */
@@ -31,7 +31,7 @@ public class Subscription {
             _hours = hours;
             _minutes = minutes;
         }
-        
+
         /**
          * Get hours.
          * 
@@ -40,7 +40,7 @@ public class Subscription {
         public int getHours() {
             return _hours;
         }
-        
+
         /**
          * Get minutes.
          * 
@@ -50,34 +50,34 @@ public class Subscription {
             return _minutes;
         }
     }
-    
-    private Integer _id;
+
+    private String _id;
     private String _channelId;
     private Date _startDate;
     private Date _endDate;
     private Time _startTime;
     private Time _endTime;
     private int _weekdays;
-    
+
     /**
      * ID.
      * 
      * @return ID.
      */
-    public Integer getId() {
+    public String getId() {
         return _id;
     }
-    
+
     /**
      * Sets the ID.
      * 
      * @param id ID.
      */
-    public Subscription setId(Integer id) {
+    public Subscription setId(String id) {
         _id = id;
         return this;
     }
-    
+
     /**
      * Channel ID.
      * 
@@ -86,7 +86,7 @@ public class Subscription {
     public String getChannelId() {
         return _channelId;
     }
-    
+
     /**
      * Sets the channel ID.
      * 
@@ -96,7 +96,7 @@ public class Subscription {
         _channelId = channelId;
         return this;
     }
-    
+
     /**
      * Start date.
      * 
@@ -105,7 +105,7 @@ public class Subscription {
     public Date getStartDate() {
         return _startDate;
     }
-    
+
     /**
      * End date.
      * 
@@ -113,20 +113,20 @@ public class Subscription {
      */
     public Date getEndDate() {
         return _endDate;
-    }    
-    
+    }
+
     /**
      * Sets the date period.
      * 
      * @param startDate Start date.
-     * @param endDate   End date.
+     * @param endDate End date.
      */
     public Subscription setDatePeriod(Date startDate, Date endDate) {
         _startDate = startDate;
         _endDate = endDate;
         return this;
     }
-    
+
     /**
      * Start time.
      * 
@@ -135,7 +135,7 @@ public class Subscription {
     public Time getStartTime() {
         return _startTime;
     }
-    
+
     /**
      * End time.
      * 
@@ -143,20 +143,20 @@ public class Subscription {
      */
     public Time getEndTime() {
         return _endTime;
-    } 
-    
+    }
+
     /**
      * Sets the time period.
      * 
      * @param startTime Start time.
-     * @param endTime   End time.
+     * @param endTime End time.
      */
     public Subscription setTimePeriod(Time startTime, Time endTime) {
         _startTime = startTime;
         _endTime = endTime;
         return this;
     }
-    
+
     /**
      * Returns the weekdays.
      * 
@@ -165,7 +165,7 @@ public class Subscription {
     public int getWeekdays() {
         return _weekdays;
     }
-    
+
     /**
      * Has weekday?
      * 
@@ -176,7 +176,7 @@ public class Subscription {
     public boolean hasWeekday(int weekday) {
         return (_weekdays & weekday) == weekday;
     }
-    
+
     /**
      * Sets the weekdays.
      * 

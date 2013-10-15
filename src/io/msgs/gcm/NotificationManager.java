@@ -29,13 +29,12 @@ import com.egeniq.utils.api.APIUtils;
 /**
  * Notification manager.
  * 
- * All methods are executed synchronously. You are yourself responsible for
- * wrapping the calls in an AsyncTask or something similar.
+ * All methods are executed synchronously. You are yourself responsible for wrapping the calls in an AsyncTask or something similar.
  */
 public class NotificationManager {
     private final static String TAG = NotificationManager.class.getSimpleName();
     private final static boolean DEBUG = BuildConfig.DEBUG;
-    
+
     private final static String NOTIFICATION_TOKEN_KEY = "notificationToken";
     private final static String DEVICE_FAMILY = "gcm";
 
@@ -75,7 +74,7 @@ public class NotificationManager {
 
         return _apiClient;
     }
-    
+
     /**
      * Is registered?
      * 
@@ -84,7 +83,7 @@ public class NotificationManager {
     public boolean isRegistered() {
         return getNotificationToken() != null;
     }
-    
+
     /**
      * Returns the current notification token.
      * 
@@ -93,7 +92,7 @@ public class NotificationManager {
     public String getNotificationToken() {
         return _context.getSharedPreferences(TAG, Context.MODE_PRIVATE).getString(_appId + "." + NOTIFICATION_TOKEN_KEY, null);
     }
-    
+
     /**
      * Register device.
      * 
@@ -119,7 +118,7 @@ public class NotificationManager {
             params.add(new BasicNameValuePair("appId", Uri.encode(_appId)));
             params.add(new BasicNameValuePair("deviceFamily", DEVICE_FAMILY));
             params.add(new BasicNameValuePair("deviceToken", Uri.encode(registrationId)));
-            
+
             if (channelId != null) {
                 params.add(new BasicNameValuePair("channelId", channelId));
             }
@@ -130,18 +129,18 @@ public class NotificationManager {
                 if (DEBUG) {
                     Log.d(TAG, "Using existing notification token: " + notificationToken);
                 }
-                
+
                 path = "subscribers/;update";
                 params.add(new BasicNameValuePair("notificationToken", notificationToken));
             }
 
             HttpEntity entity = new UrlEncodedFormEntity(params);
             JSONObject result = _getAPIClient().post(path, entity);
-            
+
             if (DEBUG) {
                 Log.d(TAG, "Registration request sent");
             }
-            
+
             if (notificationToken == null && result != null) {
                 notificationToken = APIUtils.getString(result, "notificationToken", null);
                 _setNotificationToken(notificationToken);
@@ -153,8 +152,8 @@ public class NotificationManager {
                 if (DEBUG) {
                     Log.e(TAG, "No notification token returned");
                 }
-            } 
-            
+            }
+
             if (DEBUG) {
                 Log.d(TAG, "Registration request processed");
             }
@@ -192,7 +191,7 @@ public class NotificationManager {
                 JSONObject rawSubscription = rawSubscriptions.getJSONObject(i);
 
                 Subscription subscription = new Subscription();
-                subscription.setId(APIUtils.getInt(rawSubscription, "id", 0));
+                subscription.setId(APIUtils.getString(rawSubscription, "id", null));
                 subscription.setChannelId(APIUtils.getString(rawSubscription, "channelId", ""));
 
                 String rawStartDate = APIUtils.getString(rawSubscription, "dateStart", null);
@@ -245,7 +244,7 @@ public class NotificationManager {
             throw (APIException)e;
         }
     }
-    
+
     /**
      * Subscribe.
      * 
@@ -325,7 +324,7 @@ public class NotificationManager {
 
             HttpEntity entity = new UrlEncodedFormEntity(params);
             JSONObject result = _getAPIClient().post("subscriptions", entity);
-            int id = APIUtils.getInt(result, "id", 0);
+            String id = APIUtils.getString(result, "id", null);
             subscription.setId(id);
 
             if (DEBUG) {
