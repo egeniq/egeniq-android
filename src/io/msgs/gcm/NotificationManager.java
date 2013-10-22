@@ -35,7 +35,12 @@ public class NotificationManager {
     private final static String TAG = NotificationManager.class.getSimpleName();
     private final static boolean DEBUG = BuildConfig.DEBUG;
 
+    private final static String DEVICE_TOKEN_KEY = "deviceToken";
     private final static String NOTIFICATION_TOKEN_KEY = "notificationToken";
+    private final static String LAST_REGISTER_CHANNEL_ID_KEY = "lastRegisterChannelId";
+    private final static String UPDATED_AT_KEY = "updatedAt";
+
+    private final static int TOKEN_TIMEOUT = 3 * 24 * 60 * 60; // 3 days
     private final static String DEVICE_FAMILY = "gcm";
 
     private final static SimpleDateFormat DATE_FORMAT;
@@ -85,6 +90,15 @@ public class NotificationManager {
     }
 
     /**
+     * Returns the currently known device token.
+     * 
+     * @return Device token.
+     */
+    public String getDeviceToken() {
+        return _context.getSharedPreferences(TAG, Context.MODE_PRIVATE).getString(_appId + "." + DEVICE_TOKEN_KEY, null);
+    }
+
+    /**
      * Returns the current notification token.
      * 
      * @return Notification token.
@@ -94,30 +108,68 @@ public class NotificationManager {
     }
 
     /**
+     * Returns the channel identifier used in the last registration request.
+     * 
+     * @return Channel identifier.
+     */
+    private String _getLastRegisterChannelId() {
+        return _context.getSharedPreferences(TAG, Context.MODE_PRIVATE).getString(_appId + "." + LAST_REGISTER_CHANNEL_ID_KEY, null);
+    }
+
+    /**
+     * Returns the stamp of the last registration data update.
+     * 
+     * @return Registration data update stamp.
+     */
+    private Date _getUpdatedAt() {
+        long updatedAtTime = _context.getSharedPreferences(TAG, Context.MODE_PRIVATE).getLong(_appId + "." + UPDATED_AT_KEY, 0);
+        if (updatedAtTime == 0) {
+            return null;
+        } else {
+            return new Date(updatedAtTime);
+        }
+    }
+
+    /**
      * Register device.
      * 
-     * @param registrationId
+     * @param deviceToken
      */
-    public void registerDevice(final String registrationId) throws APIException {
-        registerDevice(registrationId, null);
+    public void registerDevice(final String deviceToken) throws APIException {
+        registerDevice(deviceToken, null);
     }
 
     /**
      * Register device and subscribe to the given channel.
      * 
-     * @param registrationId
+     * @param deviceToken
      * @param channelId
      */
-    public void registerDevice(final String registrationId, final String channelId) throws APIException {
+    public void registerDevice(final String deviceToken, final String channelId) throws APIException {
         try {
             if (DEBUG) {
-                Log.d(TAG, "Send device registration request for registration ID: " + registrationId + " app ID: " + _appId);
+                Log.d(TAG, "Send device registration request for device token: " + deviceToken + " app ID: " + _appId);
+            }
+
+            // Update needed?
+            if (deviceToken.equals(getDeviceToken()) && getNotificationToken() != null) {
+                // @formatter:off
+                if (((_getLastRegisterChannelId() == null && channelId == null) ||
+                     (_getLastRegisterChannelId() != null && _getLastRegisterChannelId().equals(channelId))) &&
+                    (_getUpdatedAt() != null && new Date().getTime() - _getUpdatedAt().getTime() < TOKEN_TIMEOUT)) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Registration request cancelled, all data seems up-to-date and recent enough");
+                    }
+                    
+                    return;
+                }
+                // @formatter:on
             }
 
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("appId", Uri.encode(_appId)));
             params.add(new BasicNameValuePair("deviceFamily", DEVICE_FAMILY));
-            params.add(new BasicNameValuePair("deviceToken", Uri.encode(registrationId)));
+            params.add(new BasicNameValuePair("deviceToken", Uri.encode(deviceToken)));
 
             if (channelId != null) {
                 params.add(new BasicNameValuePair("channelId", channelId));
@@ -131,7 +183,7 @@ public class NotificationManager {
                 }
 
                 path = "subscribers/;update";
-                params.add(new BasicNameValuePair("notificationToken", notificationToken));
+                params.add(new BasicNameValuePair("notificationToken", Uri.encode(notificationToken)));
             }
 
             HttpEntity entity = new UrlEncodedFormEntity(params);
@@ -141,14 +193,14 @@ public class NotificationManager {
                 Log.d(TAG, "Registration request sent");
             }
 
-            if (notificationToken == null && result != null) {
+            if (result != null) {
                 notificationToken = APIUtils.getString(result, "notificationToken", null);
-                _setNotificationToken(notificationToken);
+                _saveRegistrationData(deviceToken, notificationToken, channelId);
 
                 if (DEBUG) {
                     Log.d(TAG, "Notification token: " + notificationToken);
                 }
-            } else if (notificationToken == null) {
+            } else {
                 if (DEBUG) {
                     Log.e(TAG, "No notification token returned");
                 }
@@ -419,13 +471,14 @@ public class NotificationManager {
     }
 
     /**
-     * Sets the new notificaction token.
-     * 
-     * @param notificationToken
+     * Saves the registration data.
      */
-    private void _setNotificationToken(String notificationToken) {
+    private void _saveRegistrationData(String deviceToken, String notificationToken, String channelId) {
         SharedPreferences.Editor editor = _context.getSharedPreferences(TAG, Context.MODE_PRIVATE).edit();
+        editor.putString(_appId + "." + DEVICE_TOKEN_KEY, deviceToken);
         editor.putString(_appId + "." + NOTIFICATION_TOKEN_KEY, notificationToken);
+        editor.putString(_appId + "." + LAST_REGISTER_CHANNEL_ID_KEY, channelId);
+        editor.putLong(_appId + "." + UPDATED_AT_KEY, new Date().getTime());
         editor.commit();
     }
 }
