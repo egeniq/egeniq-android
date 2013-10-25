@@ -40,7 +40,7 @@ public class NotificationManager {
     private final static String LAST_REGISTER_CHANNEL_ID_KEY = "lastRegisterChannelId";
     private final static String UPDATED_AT_KEY = "updatedAt";
 
-    private final static int TOKEN_TIMEOUT = 3 * 24 * 60 * 60; // 3 days
+    private final static int TOKEN_TIMEOUT = 3;// * 24 * 60 * 60; // 3 days
     private final static String DEVICE_FAMILY = "gcm";
 
     private final static SimpleDateFormat DATE_FORMAT;
@@ -169,7 +169,7 @@ public class NotificationManager {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("appId", Uri.encode(_appId)));
             params.add(new BasicNameValuePair("deviceFamily", DEVICE_FAMILY));
-            params.add(new BasicNameValuePair("deviceToken", Uri.encode(deviceToken)));
+            params.add(new BasicNameValuePair("deviceToken", deviceToken));
 
             if (channelId != null) {
                 params.add(new BasicNameValuePair("channelId", channelId));
@@ -183,7 +183,7 @@ public class NotificationManager {
                 }
 
                 path = "subscribers/;update";
-                params.add(new BasicNameValuePair("notificationToken", Uri.encode(notificationToken)));
+                params.add(new BasicNameValuePair("notificationToken", notificationToken));
             }
 
             HttpEntity entity = new UrlEncodedFormEntity(params);
