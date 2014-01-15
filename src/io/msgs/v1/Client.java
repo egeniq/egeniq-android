@@ -1,6 +1,6 @@
-package io.msgs.gcm;
+package io.msgs.v1;
 
-import io.msgs.gcm.Subscription.Time;
+import io.msgs.v1.Subscription.Time;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,15 +27,17 @@ import com.egeniq.utils.api.APIException;
 import com.egeniq.utils.api.APIUtils;
 
 /**
- * Notification manager.
+ * Notification client.
  * 
- * All methods are executed synchronously. You are yourself responsible for wrapping the calls in an AsyncTask or something similar.
+ * All methods are executed synchronously. You are yourself 
+ * responsible for wrapping the calls in an AsyncTask or something similar.
  */
-public class NotificationManager {
-    private final static String TAG = NotificationManager.class.getSimpleName();
+public class Client {
+    private final static String TAG = Client.class.getSimpleName();
     private final static boolean DEBUG = BuildConfig.DEBUG;
 
     private final static String DEVICE_TOKEN_KEY = "deviceToken";
+    private final static String NOTIFICATION_TAG = "NotificationManager";
     private final static String NOTIFICATION_TOKEN_KEY = "notificationToken";
     private final static String LAST_REGISTER_CHANNEL_ID_KEY = "lastRegisterChannelId";
     private final static String UPDATED_AT_KEY = "updatedAt";
@@ -61,7 +63,7 @@ public class NotificationManager {
      * @param context
      * @param serviceBaseURL
      */
-    public NotificationManager(Context context, String serviceBaseURL, String appId) {
+    public Client(Context context, String serviceBaseURL, String appId) {
         _context = context;
         _serviceBaseURL = serviceBaseURL;
         _appId = appId;
@@ -95,7 +97,7 @@ public class NotificationManager {
      * @return Device token.
      */
     public String getDeviceToken() {
-        return _context.getSharedPreferences(TAG, Context.MODE_PRIVATE).getString(_appId + "." + DEVICE_TOKEN_KEY, null);
+        return _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).getString(_appId + "." + DEVICE_TOKEN_KEY, null);
     }
 
     /**
@@ -104,7 +106,7 @@ public class NotificationManager {
      * @return Notification token.
      */
     public String getNotificationToken() {
-        return _context.getSharedPreferences(TAG, Context.MODE_PRIVATE).getString(_appId + "." + NOTIFICATION_TOKEN_KEY, null);
+        return _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).getString(_appId + "." + NOTIFICATION_TOKEN_KEY, null);
     }
 
     /**
@@ -113,7 +115,7 @@ public class NotificationManager {
      * @return Channel identifier.
      */
     private String _getLastRegisterChannelId() {
-        return _context.getSharedPreferences(TAG, Context.MODE_PRIVATE).getString(_appId + "." + LAST_REGISTER_CHANNEL_ID_KEY, null);
+        return _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).getString(_appId + "." + LAST_REGISTER_CHANNEL_ID_KEY, null);
     }
 
     /**
@@ -122,7 +124,7 @@ public class NotificationManager {
      * @return Registration data update stamp.
      */
     private Date _getUpdatedAt() {
-        long updatedAtTime = _context.getSharedPreferences(TAG, Context.MODE_PRIVATE).getLong(_appId + "." + UPDATED_AT_KEY, 0);
+        long updatedAtTime = _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).getLong(_appId + "." + UPDATED_AT_KEY, 0);
         if (updatedAtTime == 0) {
             return null;
         } else {
@@ -474,7 +476,7 @@ public class NotificationManager {
      * Saves the registration data.
      */
     private void _saveRegistrationData(String deviceToken, String notificationToken, String channelId) {
-        SharedPreferences.Editor editor = _context.getSharedPreferences(TAG, Context.MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor = _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).edit();
         editor.putString(_appId + "." + DEVICE_TOKEN_KEY, deviceToken);
         editor.putString(_appId + "." + NOTIFICATION_TOKEN_KEY, notificationToken);
         editor.putString(_appId + "." + LAST_REGISTER_CHANNEL_ID_KEY, channelId);
