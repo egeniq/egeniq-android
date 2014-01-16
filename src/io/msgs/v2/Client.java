@@ -34,10 +34,12 @@ public class Client {
     private final static String TAG = Client.class.getSimpleName();
     private final static boolean DEBUG = BuildConfig.DEBUG;
 
-    private final static String DEVICE_ADDRESS_KEY = "deviceAdress";
-    private final static String USER_TOKEN_KEY = "userToken";
-    private final static String NOTIFICATION_TAG = "NotificationManager";
-    private final static String NOTIFICATION_TOKEN_KEY = "notificationToken";
+    private final static String MSGS_TAG = "Msgs";
+
+    private final static String KEY_ENDPOINT_ADDRESS = "deviceAdress";
+    private final static String KEY_ENDPOINT_TOKEN = "endpointToken";
+    private final static String KEY_USER_TOKEN = "userToken";
+    private final static String KEY_EXTERNAL_USER_ID = "externalUserId";
 
     private final Context _context;
     private final String _serviceBaseURL;
@@ -47,8 +49,8 @@ public class Client {
 
     private APIClient _apiClient;
 
-    private String _deviceToken;
-    private String _userToken;
+    // private String _deviceToken;
+    // private String _userToken;
 
     public final static SimpleDateFormat DATE_FORMAT;
     static {
@@ -98,30 +100,35 @@ public class Client {
      * 
      * @throws APIException
      */
-    public void registerDevice(String deviceId) throws APIException {
+    public void registerEndpoint(String address) throws APIException {
         try {
-            if (_getEndpointToken() != null && deviceId.equals(_getDeviceAddress())) {
+            String endpointToken = _getPreferenceForKey(KEY_ENDPOINT_TOKEN);
+            String endpointAddress = _getPreferenceForKey(KEY_ENDPOINT_ADDRESS);
+            String userToken = _getPreferenceForKey(KEY_USER_TOKEN);
+
+            if (endpointToken != null && address.equals(endpointAddress)) {
                 return;
             }
 
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("type", _getDeviceType()));
-            params.add(new BasicNameValuePair("address", deviceId));
+            params.add(new BasicNameValuePair("address", address));
             params.add(new BasicNameValuePair("name", _getDeviceName()));
             HttpEntity entity = new UrlEncodedFormEntity(params);
+            JSONObject object = null;
 
-            if (_getUserToken() != null) {
-                JSONObject object = _getAPIClient().post("/users/" + _getUserToken() + "/endpoints", entity, false);
-                _setEndpointToken(APIUtils.getString(object, "token", null));
+            if (endpointToken != null && !address.equals(endpointAddress) && userToken != null) {
+                object = _getAPIClient().post("/users/" + userToken + "/endpoints" + endpointToken, entity, false);
+            } else if (endpointToken != null && !address.equals(endpointAddress)) {
+                object = _getAPIClient().post("/endpoints" + endpointToken, entity, false);
+            } else if (userToken != null) {
+                object = _getAPIClient().post("/users/" + userToken + "/endpoints", entity, false);
             } else {
-                JSONObject object = _getAPIClient().post("/endpoints", entity, false);
-                _setEndpointToken(APIUtils.getString(object, "token", null));
-                _setDeviceAddress(APIUtils.getString(object, "address", null));
+                object = _getAPIClient().post("/endpoints", entity, false);
             }
-            if (!deviceId.equals(_getDeviceAddress())) {
-                JSONObject object = _getAPIClient().post("/endpoints" + _getEndpointToken(), entity, false);
-                _setDeviceAddress(APIUtils.getString(object, "address", null));
-            }
+
+            _setPreferenceKey(KEY_ENDPOINT_TOKEN, APIUtils.getString(object, "token", null));
+            _setPreferenceKey(KEY_ENDPOINT_ADDRESS, address);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error registering device", e);
@@ -139,32 +146,41 @@ public class Client {
      * Unregister device.
      */
     public void unregisterDevice() {
-        SharedPreferences.Editor editor = _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).edit();
-        editor.remove(_apiKey + "." + DEVICE_ADDRESS_KEY);
-        editor.commit();
+        _setPreferenceKey(KEY_ENDPOINT_ADDRESS, null);
     }
 
     /**
      * Register user.
      * 
-     * @param userId
+     * @param externalUserId
+     * 
      * @throws APIException
      */
-    public void registerUser(String userId) throws APIException {
-        // POST /users
-        // indien device al bekend is (gebruiker was eerst niet ingelogd)
-        // ook POST /users/:userToken/endpoints
-
+    public void registerUser(String externalUserId) throws APIException {
         try {
+            String userToken = _getPreferenceForKey(KEY_USER_TOKEN);
+            String externalUserToken = _getPreferenceForKey(KEY_EXTERNAL_USER_ID);
+            if (userToken != null && externalUserId.equals(externalUserToken)) {
+                return;
+            }
+
             List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("externalUserId", userId));
+            params.add(new BasicNameValuePair("externalUserId", externalUserId));
 
             HttpEntity entity = new UrlEncodedFormEntity(params);
             JSONObject object = _getAPIClient().post("/users", entity, false);
-            _setUserToken(APIUtils.getString(object, "token", null));
+            _setPreferenceKey(KEY_USER_TOKEN, APIUtils.getString(object, "token", null));
+            _setPreferenceKey(KEY_EXTERNAL_USER_ID, externalUserId);
+
+            // indien device al bekend is (gebruiker was eerst niet ingelogd)
+            String endpointAddress = _getPreferenceForKey(KEY_ENDPOINT_ADDRESS);
+            _setPreferenceKey(KEY_ENDPOINT_TOKEN, null);
+
+            registerEndpoint(endpointAddress);
+            return;
         } catch (Exception e) {
             if (DEBUG) {
-                Log.e(TAG, "Error registering device", e);
+                Log.e(TAG, "Error registering user", e);
             }
 
             if (!(e instanceof APIException)) {
@@ -179,23 +195,21 @@ public class Client {
      * Unregister user.
      */
     public void unregisterUser() {
-        SharedPreferences.Editor editor = _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).edit();
-        editor.remove(_apiKey + "." + USER_TOKEN_KEY);
-        editor.commit();
+        _setPreferenceKey(KEY_USER_TOKEN, null);
     }
 
     /**
      * Get user.
      */
     public UserRequestHelper user() {
-        return new UserRequestHelper(this, _getUserToken());
+        return new UserRequestHelper(this, _getPreferenceForKey(KEY_USER_TOKEN));
     }
 
     /**
      * Get endpoint.
      */
     public EndpointRequestHelper endpoint() {
-        return endpoint(_getEndpointToken());
+        return endpoint(_getPreferenceForKey(KEY_ENDPOINT_TOKEN));
     }
 
     /**
@@ -208,52 +222,23 @@ public class Client {
     }
 
     /**
-     * get EndpointToken.
+     * Get value from shared preferences.
      */
-    private String _getEndpointToken() {
-        return _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).getString(_apiKey + "." + USER_TOKEN_KEY, null);
+    private String _getPreferenceForKey(String key) {
+        return _context.getSharedPreferences(MSGS_TAG, Context.MODE_PRIVATE).getString(key, null);
     }
 
     /**
-     * Returns the currently known device token.
-     * 
-     * @return Device token.
+     * Save value in shared preferences. <br>
+     * If value is null, key will be removed.
      */
-    private String _getDeviceAddress() {
-        return _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).getString(_deviceToken + "." + DEVICE_ADDRESS_KEY, null);
-    }
-
-    /**
-     * Get UserToken.
-     */
-    private String _getUserToken() {
-        return _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).getString(_userToken + "." + USER_TOKEN_KEY, null);
-    }
-
-    /**
-     * Save EndpointToken to shared preferences.
-     */
-    private void _setEndpointToken(String endpointToken) {
-        SharedPreferences.Editor editor = _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).edit();
-        editor.putString(_apiKey + "." + DEVICE_ADDRESS_KEY, endpointToken);
-        editor.commit();
-    }
-
-    /**
-     * Save DeviceAddress to shared preferences.
-     */
-    private void _setDeviceAddress(String deviceAddress) {
-        SharedPreferences.Editor editor = _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).edit();
-        editor.putString(_apiKey + "." + DEVICE_ADDRESS_KEY, deviceAddress);
-        editor.commit();
-    }
-
-    /**
-     * Save EndpointToken to shared preferences.
-     */
-    private void _setUserToken(String userToken) {
-        SharedPreferences.Editor editor = _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).edit();
-        editor.putString(_apiKey + "." + USER_TOKEN_KEY, userToken);
+    private void _setPreferenceKey(String key, String value) {
+        SharedPreferences.Editor editor = _context.getSharedPreferences(MSGS_TAG, Context.MODE_PRIVATE).edit();
+        if (value == null) {
+            editor.remove(key);
+        } else {
+            editor.putString(key, value);
+        }
         editor.commit();
     }
 
