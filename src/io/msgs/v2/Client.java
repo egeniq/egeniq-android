@@ -34,7 +34,7 @@ public class Client {
     private final static String TAG = Client.class.getSimpleName();
     private final static boolean DEBUG = BuildConfig.DEBUG;
 
-    private final static String DEVICE_TOKEN_KEY = "deviceToken";
+    private final static String DEVICE_ADDRESS_KEY = "deviceAdress";
     private final static String USER_TOKEN_KEY = "userToken";
     private final static String NOTIFICATION_TAG = "NotificationManager";
     private final static String NOTIFICATION_TOKEN_KEY = "notificationToken";
@@ -42,6 +42,8 @@ public class Client {
     private final Context _context;
     private final String _serviceBaseURL;
     private final String _apiKey;
+    private final String _deviceType;
+    private final String _deviceName;
 
     private APIClient _apiClient;
 
@@ -61,10 +63,12 @@ public class Client {
      * @param serviceBaseURL
      * @param apiKey
      */
-    public Client(Context context, String serviceBaseURL, String apiKey) {
+    public Client(Context context, String serviceBaseURL, String apiKey, String deviceType, String deviceName) {
         _context = context;
         _serviceBaseURL = serviceBaseURL;
         _apiKey = apiKey;
+        _deviceType = deviceType;
+        _deviceName = deviceName;
     }
 
     /**
@@ -80,9 +84,6 @@ public class Client {
         return _apiClient;
     }
 
-    
-
-
     /**
      * Returns the Api Key.
      */
@@ -94,44 +95,32 @@ public class Client {
      * Register device.
      * 
      * @param deviceId
+     * 
      * @throws APIException
      */
     public void registerDevice(String deviceId) throws APIException {
         try {
-            if (_getEndpointToken() != null && deviceId.equals(_getDeviceToken())) {
+            if (_getEndpointToken() != null && deviceId.equals(_getDeviceAddress())) {
                 return;
             }
 
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add(new BasicNameValuePair("type", _getDeviceType()));
+            params.add(new BasicNameValuePair("address", deviceId));
+            params.add(new BasicNameValuePair("name", _getDeviceName()));
+            HttpEntity entity = new UrlEncodedFormEntity(params);
+
             if (_getUserToken() != null) {
-                List<NameValuePair> params = new ArrayList<NameValuePair>();
-                params.add(new BasicNameValuePair("userToken", _getUserToken()));
-                params.add(new BasicNameValuePair("type", "android-tablet")); // TODO:
-                params.add(new BasicNameValuePair("address", _getNotificationToken()));
-                params.add(new BasicNameValuePair("name", "My tablet")); //TODO:
-                params.add(new BasicNameValuePair("endpointSubscriptionsActive", "1")); //TODO:
-                params.add(new BasicNameValuePair("userSubscriptionsActive", "1")); //TODO:
-                
-                HttpEntity entity = new UrlEncodedFormEntity(params);
                 JSONObject object = _getAPIClient().post("/users/" + _getUserToken() + "/endpoints", entity, false);
-                
-                // Save token
-                SharedPreferences.Editor editor = _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).edit();
-                editor.putString(_apiKey + "." + DEVICE_TOKEN_KEY, APIUtils.getString(object, "token", null));
-                editor.commit();
+                _setEndpointToken(APIUtils.getString(object, "token", null));
             } else {
-                List<NameValuePair> params = new ArrayList<NameValuePair>();
-                params.add(new BasicNameValuePair("type", "android-tablet")); // TODO:
-                params.add(new BasicNameValuePair("address", _getNotificationToken()));
-                params.add(new BasicNameValuePair("name", "My tablet")); //TODO:
-                params.add(new BasicNameValuePair("endpointSubscriptionsActive", "1")); //TODO:
-                params.add(new BasicNameValuePair("userSubscriptionsActive", "1")); //TODO:
-                HttpEntity entity = new UrlEncodedFormEntity(params);
                 JSONObject object = _getAPIClient().post("/endpoints", entity, false);
-                
-                // Save token
-                SharedPreferences.Editor editor = _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).edit();
-                editor.putString(_apiKey + "." + DEVICE_TOKEN_KEY, APIUtils.getString(object, "token", null));
-                editor.commit();
+                _setEndpointToken(APIUtils.getString(object, "token", null));
+                _setDeviceAddress(APIUtils.getString(object, "address", null));
+            }
+            if (!deviceId.equals(_getDeviceAddress())) {
+                JSONObject object = _getAPIClient().post("/endpoints" + _getEndpointToken(), entity, false);
+                _setDeviceAddress(APIUtils.getString(object, "address", null));
             }
         } catch (Exception e) {
             if (DEBUG) {
@@ -151,7 +140,7 @@ public class Client {
      */
     public void unregisterDevice() {
         SharedPreferences.Editor editor = _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).edit();
-        editor.remove(_apiKey + "." + DEVICE_TOKEN_KEY);
+        editor.remove(_apiKey + "." + DEVICE_ADDRESS_KEY);
         editor.commit();
     }
 
@@ -167,8 +156,12 @@ public class Client {
         // ook POST /users/:userToken/endpoints
 
         try {
-            HttpEntity entity = new UrlEncodedFormEntity(null);
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add(new BasicNameValuePair("externalUserId", userId));
+
+            HttpEntity entity = new UrlEncodedFormEntity(params);
             JSONObject object = _getAPIClient().post("/users", entity, false);
+            _setUserToken(APIUtils.getString(object, "token", null));
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error registering device", e);
@@ -186,7 +179,9 @@ public class Client {
      * Unregister user.
      */
     public void unregisterUser() {
-        // remove usertoken from shared pref
+        SharedPreferences.Editor editor = _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).edit();
+        editor.remove(_apiKey + "." + USER_TOKEN_KEY);
+        editor.commit();
     }
 
     /**
@@ -213,21 +208,19 @@ public class Client {
     }
 
     /**
-    * Returns the current notification token.
-    *
-    * @return Notification token.
-    */
-    private String _getNotificationToken() {
-        return _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).getString(_apiKey + "." + NOTIFICATION_TOKEN_KEY, null);
+     * get EndpointToken.
+     */
+    private String _getEndpointToken() {
+        return _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).getString(_apiKey + "." + USER_TOKEN_KEY, null);
     }
-    
+
     /**
      * Returns the currently known device token.
      * 
      * @return Device token.
      */
-    private String _getDeviceToken() {
-        return _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).getString(_deviceToken + "." + DEVICE_TOKEN_KEY, null);
+    private String _getDeviceAddress() {
+        return _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).getString(_deviceToken + "." + DEVICE_ADDRESS_KEY, null);
     }
 
     /**
@@ -238,10 +231,44 @@ public class Client {
     }
 
     /**
-     * get EndpointToken.
+     * Save EndpointToken to shared preferences.
      */
-    private String _getEndpointToken() {
-        return "endpoint"; // TODO
+    private void _setEndpointToken(String endpointToken) {
+        SharedPreferences.Editor editor = _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).edit();
+        editor.putString(_apiKey + "." + DEVICE_ADDRESS_KEY, endpointToken);
+        editor.commit();
+    }
+
+    /**
+     * Save DeviceAddress to shared preferences.
+     */
+    private void _setDeviceAddress(String deviceAddress) {
+        SharedPreferences.Editor editor = _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).edit();
+        editor.putString(_apiKey + "." + DEVICE_ADDRESS_KEY, deviceAddress);
+        editor.commit();
+    }
+
+    /**
+     * Save EndpointToken to shared preferences.
+     */
+    private void _setUserToken(String userToken) {
+        SharedPreferences.Editor editor = _context.getSharedPreferences(NOTIFICATION_TAG, Context.MODE_PRIVATE).edit();
+        editor.putString(_apiKey + "." + USER_TOKEN_KEY, userToken);
+        editor.commit();
+    }
+
+    /**
+     * Get device type, e.g. "android-tablet"
+     */
+    private String _getDeviceType() {
+        return _deviceType;
+    }
+
+    /**
+     * Get device name, e.g. "Samsung Galaxy S4"
+     */
+    private String _getDeviceName() {
+        return _deviceName;
     }
 
 }
