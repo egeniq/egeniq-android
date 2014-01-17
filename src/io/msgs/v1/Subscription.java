@@ -1,4 +1,4 @@
-package io.msgs.gcm;
+package io.msgs.v1;
 
 import java.util.Date;
 
