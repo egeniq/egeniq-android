@@ -239,28 +239,28 @@ public class Client {
     /**
      * Get Api Header
      */
-    private Header[] getApiHeader() {
-        return new Header[] { new BasicHeader("X-MsgsIo-APIKey", _apiKey) };
+    private Header getApiHeader() {
+        return new BasicHeader("X-MsgsIo-APIKey", _apiKey);
     }
 
     /**
      * Perform a GET request with the ApiKey header.
      */
     protected JSONObject _get(String location, boolean useSSL) throws APIException {
-        return _getAPIClient().get(location, useSSL, getApiHeader());
+        return _getAPIClient().get(location, useSSL, new Header[] { getApiHeader() });
     }
 
     /**
      * Perform a POST request with the ApiKey header.
      */
     protected JSONObject _post(String location, HttpEntity entity, boolean useSSL) throws APIException {
-        return _getAPIClient().post(location, entity, useSSL, getApiHeader());
+        return _getAPIClient().post(location, entity, useSSL, new Header[] { getApiHeader() });
     }
 
     /**
      * Perform a DELETE request with the ApiKey header.
      */
     protected JSONObject _delete(String location, boolean useSSL) throws APIException {
-        return _getAPIClient().delete(location, useSSL, getApiHeader());
+        return _getAPIClient().delete(location, useSSL, new Header[] { getApiHeader() });
     }
 }
