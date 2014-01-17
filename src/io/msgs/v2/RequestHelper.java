@@ -213,9 +213,7 @@ public abstract class RequestHelper {
         List<Subscription> subscriptions = new ArrayList<Subscription>();
         for (int i = 0; i < array.length(); i++) {
             try {
-                Subscription subscription = new Subscription();
-                subscription.setChannel(_parseChannel(APIUtils.getObject(array.getJSONObject(i), "channel", null)));
-                subscriptions.add(subscription);
+                subscriptions.add(_parseSubscription(array.getJSONObject(i)));
             } catch (JSONException e) {
                 if (DEBUG) {
                     Log.e(TAG, "Error parsing subscription", e);
