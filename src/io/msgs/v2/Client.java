@@ -91,10 +91,10 @@ public class Client {
      */
     public void registerEndpoint(String address) throws APIException {
         try {
-            String endpointToken = _getPreferenceForKey(KEY_ENDPOINT_TOKEN);
-            String userToken = _getPreferenceForKey(KEY_USER_TOKEN);
+            String endpointToken = _getPreference(KEY_ENDPOINT_TOKEN);
+            String userToken = _getPreference(KEY_USER_TOKEN);
 
-            if (endpointToken != null && address.equals(_getPreferenceForKey(KEY_ENDPOINT_ADDRESS))) {
+            if (endpointToken != null && address.equals(_getPreference(KEY_ENDPOINT_ADDRESS))) {
                 return;
             }
 
@@ -146,9 +146,9 @@ public class Client {
      */
     public void registerUser(String externalUserId) throws APIException {
         try {
-            String userToken = _getPreferenceForKey(KEY_USER_TOKEN);
+            String userToken = _getPreference(KEY_USER_TOKEN);
 
-            if (userToken != null && externalUserId.equals(_getPreferenceForKey(KEY_EXTERNAL_USER_ID))) {
+            if (userToken != null && externalUserId.equals(_getPreference(KEY_EXTERNAL_USER_ID))) {
                 return;
             }
 
@@ -160,7 +160,7 @@ public class Client {
             _setPreference(KEY_USER_TOKEN, APIUtils.getString(object, "token", null));
             _setPreference(KEY_EXTERNAL_USER_ID, externalUserId);
 
-            String endpointAddress = _getPreferenceForKey(KEY_ENDPOINT_ADDRESS);
+            String endpointAddress = _getPreference(KEY_ENDPOINT_ADDRESS);
             if (endpointAddress != null) {
                 _setPreference(KEY_ENDPOINT_TOKEN, null);
                 registerEndpoint(endpointAddress);
@@ -189,14 +189,14 @@ public class Client {
      * Get user.
      */
     public UserRequestHelper user() {
-        return new UserRequestHelper(this, _getPreferenceForKey(KEY_USER_TOKEN));
+        return new UserRequestHelper(this, _getPreference(KEY_USER_TOKEN));
     }
 
     /**
      * Get endpoint.
      */
     public EndpointRequestHelper endpoint() {
-        return endpoint(_getPreferenceForKey(KEY_ENDPOINT_TOKEN));
+        return endpoint(_getPreference(KEY_ENDPOINT_TOKEN));
     }
 
     /**
@@ -211,7 +211,7 @@ public class Client {
     /**
      * Get value from shared preferences.
      */
-    private String _getPreferenceForKey(String key) {
+    private String _getPreference(String key) {
         return _context.getSharedPreferences(MSGS_TAG, Context.MODE_PRIVATE).getString(key, null);
     }
 
