@@ -1,8 +1,5 @@
 package io.msgs.v2;
 
-import io.msgs.v2.helper.EndpointRequestHelper;
-import io.msgs.v2.helper.UserRequestHelper;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,9 +45,6 @@ public class Client {
     private final String _deviceName;
 
     private APIClient _apiClient;
-
-    // private String _deviceToken;
-    // private String _userToken;
 
     public final static SimpleDateFormat DATE_FORMAT;
     static {
@@ -160,6 +154,7 @@ public class Client {
         try {
             String userToken = _getPreferenceForKey(KEY_USER_TOKEN);
             String externalUserToken = _getPreferenceForKey(KEY_EXTERNAL_USER_ID);
+
             if (userToken != null && externalUserId.equals(externalUserToken)) {
                 return;
             }
@@ -172,7 +167,6 @@ public class Client {
             _setPreferenceKey(KEY_USER_TOKEN, APIUtils.getString(object, "token", null));
             _setPreferenceKey(KEY_EXTERNAL_USER_ID, externalUserId);
 
-            // indien device al bekend is (gebruiker was eerst niet ingelogd)
             String endpointAddress = _getPreferenceForKey(KEY_ENDPOINT_ADDRESS);
             _setPreferenceKey(KEY_ENDPOINT_TOKEN, null);
 
@@ -254,6 +248,24 @@ public class Client {
      */
     private String _getDeviceName() {
         return _deviceName;
+    }
+
+    /**
+     * Perform a GET request with the ApiKey header.
+     */
+    protected JSONObject _get(String location, boolean useSSL) throws APIException {
+        // TODO: insert header.
+        // _getAPIClient().get(location, useSSL, headers);
+        return null;
+    }
+
+    /**
+     * Perform a POST request with the ApiKey header.
+     */
+    protected JSONObject _post(String location, HttpEntity entity, boolean useSSL) throws APIException {
+        // TODO: insert header.
+        // _getAPIClient().post(location, entity, useSSL, headers);
+        return null;
     }
 
 }

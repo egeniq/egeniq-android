@@ -1,5 +1,9 @@
 package io.msgs.v2.entity;
 
+/**
+ * SubscriptionList enitiy.
+ *
+ */
 public class SubscriptionList {
     private int _total;
     private int _count;
@@ -43,7 +47,7 @@ public class SubscriptionList {
     /**
      * Set subscriptions
      */
-    public void set_subscriptions(Subscription[] subscriptions) {
+    public void setSubscriptions(Subscription[] subscriptions) {
         _subscriptions = subscriptions;
     }
 

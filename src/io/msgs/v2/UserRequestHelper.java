@@ -1,6 +1,5 @@
-package io.msgs.v2.helper;
+package io.msgs.v2;
 
-import io.msgs.v2.Client;
 
 /**
  * Request Helper for User.
@@ -18,7 +17,7 @@ public class UserRequestHelper extends RequestHelper {
     }
 
     /**
-     * @see io.msgs.v2.helper.RequestHelper#_getBasePath()
+     * @see io.msgs.v2.RequestHelper#_getBasePath()
      */
     @Override
     protected String _getBasePath() {
