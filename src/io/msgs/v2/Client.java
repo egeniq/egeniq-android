@@ -1,5 +1,7 @@
 package io.msgs.v2;
 
+import io.msgs.v2.utils.Utils;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,9 +13,11 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+import ch.boye.httpclientandroidlib.Header;
 import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.NameValuePair;
 import ch.boye.httpclientandroidlib.client.entity.UrlEncodedFormEntity;
+import ch.boye.httpclientandroidlib.message.BasicHeader;
 import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
 
 import com.egeniq.BuildConfig;
@@ -42,7 +46,6 @@ public class Client {
     private final String _serviceBaseURL;
     private final String _apiKey;
     private final String _deviceType;
-    private final String _deviceName;
 
     private APIClient _apiClient;
 
@@ -59,12 +62,11 @@ public class Client {
      * @param serviceBaseURL
      * @param apiKey
      */
-    public Client(Context context, String serviceBaseURL, String apiKey, String deviceType, String deviceName) {
+    public Client(Context context, String serviceBaseURL, String apiKey, String deviceType) {
         _context = context;
         _serviceBaseURL = serviceBaseURL;
         _apiKey = apiKey;
         _deviceType = deviceType;
-        _deviceName = deviceName;
     }
 
     /**
@@ -74,17 +76,10 @@ public class Client {
      */
     protected APIClient _getAPIClient() {
         if (_apiClient == null) {
-            _apiClient = new APIClient(_serviceBaseURL); // add api key header
+            _apiClient = new APIClient(_serviceBaseURL);
         }
 
         return _apiClient;
-    }
-
-    /**
-     * Returns the Api Key.
-     */
-    public String getApiKey() {
-        return _apiKey;
     }
 
     /**
@@ -97,32 +92,31 @@ public class Client {
     public void registerEndpoint(String address) throws APIException {
         try {
             String endpointToken = _getPreferenceForKey(KEY_ENDPOINT_TOKEN);
-            String endpointAddress = _getPreferenceForKey(KEY_ENDPOINT_ADDRESS);
             String userToken = _getPreferenceForKey(KEY_USER_TOKEN);
 
-            if (endpointToken != null && address.equals(endpointAddress)) {
+            if (endpointToken != null && address.equals(_getPreferenceForKey(KEY_ENDPOINT_ADDRESS))) {
                 return;
             }
 
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("type", _getDeviceType()));
             params.add(new BasicNameValuePair("address", address));
-            params.add(new BasicNameValuePair("name", _getDeviceName()));
+            params.add(new BasicNameValuePair("name", Utils.getDeviceName()));
             HttpEntity entity = new UrlEncodedFormEntity(params);
             JSONObject object = null;
 
-            if (endpointToken != null && !address.equals(endpointAddress) && userToken != null) {
-                object = _getAPIClient().post("/users/" + userToken + "/endpoints" + endpointToken, entity, false);
-            } else if (endpointToken != null && !address.equals(endpointAddress)) {
-                object = _getAPIClient().post("/endpoints" + endpointToken, entity, false);
+            if (endpointToken != null && userToken != null) {
+                object = _post("/users/" + userToken + "/endpoints/" + endpointToken, entity, false);
+            } else if (endpointToken != null) {
+                object = _post("/endpoints" + endpointToken, entity, false);
             } else if (userToken != null) {
-                object = _getAPIClient().post("/users/" + userToken + "/endpoints", entity, false);
+                object = _post("/users/" + userToken + "/endpoints/", entity, false);
             } else {
-                object = _getAPIClient().post("/endpoints", entity, false);
+                object = _post("/endpoints", entity, false);
             }
 
-            _setPreferenceKey(KEY_ENDPOINT_TOKEN, APIUtils.getString(object, "token", null));
-            _setPreferenceKey(KEY_ENDPOINT_ADDRESS, address);
+            _setPreference(KEY_ENDPOINT_TOKEN, APIUtils.getString(object, "token", null));
+            _setPreference(KEY_ENDPOINT_ADDRESS, address);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error registering device", e);
@@ -140,7 +134,7 @@ public class Client {
      * Unregister device.
      */
     public void unregisterDevice() {
-        _setPreferenceKey(KEY_ENDPOINT_ADDRESS, null);
+        _setPreference(KEY_ENDPOINT_ADDRESS, null);
     }
 
     /**
@@ -153,9 +147,8 @@ public class Client {
     public void registerUser(String externalUserId) throws APIException {
         try {
             String userToken = _getPreferenceForKey(KEY_USER_TOKEN);
-            String externalUserToken = _getPreferenceForKey(KEY_EXTERNAL_USER_ID);
 
-            if (userToken != null && externalUserId.equals(externalUserToken)) {
+            if (userToken != null && externalUserId.equals(_getPreferenceForKey(KEY_EXTERNAL_USER_ID))) {
                 return;
             }
 
@@ -163,15 +156,15 @@ public class Client {
             params.add(new BasicNameValuePair("externalUserId", externalUserId));
 
             HttpEntity entity = new UrlEncodedFormEntity(params);
-            JSONObject object = _getAPIClient().post("/users", entity, false);
-            _setPreferenceKey(KEY_USER_TOKEN, APIUtils.getString(object, "token", null));
-            _setPreferenceKey(KEY_EXTERNAL_USER_ID, externalUserId);
+            JSONObject object = _post("/users", entity, false);
+            _setPreference(KEY_USER_TOKEN, APIUtils.getString(object, "token", null));
+            _setPreference(KEY_EXTERNAL_USER_ID, externalUserId);
 
             String endpointAddress = _getPreferenceForKey(KEY_ENDPOINT_ADDRESS);
-            _setPreferenceKey(KEY_ENDPOINT_TOKEN, null);
-
-            registerEndpoint(endpointAddress);
-            return;
+            if (endpointAddress != null) {
+                _setPreference(KEY_ENDPOINT_TOKEN, null);
+                registerEndpoint(endpointAddress);
+            }
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error registering user", e);
@@ -189,7 +182,7 @@ public class Client {
      * Unregister user.
      */
     public void unregisterUser() {
-        _setPreferenceKey(KEY_USER_TOKEN, null);
+        _setPreference(KEY_USER_TOKEN, null);
     }
 
     /**
@@ -226,7 +219,7 @@ public class Client {
      * Save value in shared preferences. <br>
      * If value is null, key will be removed.
      */
-    private void _setPreferenceKey(String key, String value) {
+    private void _setPreference(String key, String value) {
         SharedPreferences.Editor editor = _context.getSharedPreferences(MSGS_TAG, Context.MODE_PRIVATE).edit();
         if (value == null) {
             editor.remove(key);
@@ -244,28 +237,30 @@ public class Client {
     }
 
     /**
-     * Get device name, e.g. "Samsung Galaxy S4"
+     * Get Api Header
      */
-    private String _getDeviceName() {
-        return _deviceName;
+    private Header[] getApiHeader() {
+        return new Header[] { new BasicHeader("X-MsgsIo-APIKey", _apiKey) };
     }
 
     /**
      * Perform a GET request with the ApiKey header.
      */
     protected JSONObject _get(String location, boolean useSSL) throws APIException {
-        // TODO: insert header.
-        // _getAPIClient().get(location, useSSL, headers);
-        return null;
+        return _getAPIClient().get(location, useSSL, getApiHeader());
     }
 
     /**
      * Perform a POST request with the ApiKey header.
      */
     protected JSONObject _post(String location, HttpEntity entity, boolean useSSL) throws APIException {
-        // TODO: insert header.
-        // _getAPIClient().post(location, entity, useSSL, headers);
-        return null;
+        return _getAPIClient().post(location, entity, useSSL, getApiHeader());
     }
 
+    /**
+     * Perform a DELETE request with the ApiKey header.
+     */
+    protected JSONObject _delete(String location, boolean useSSL) throws APIException {
+        return _getAPIClient().delete(location, useSSL, getApiHeader());
+    }
 }

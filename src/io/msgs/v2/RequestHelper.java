@@ -29,7 +29,8 @@ public abstract class RequestHelper {
     private final static String TAG = RequestHelper.class.getSimpleName();
     private final static boolean DEBUG = BuildConfig.DEBUG;
 
-    protected Client _client;
+    private Client _client;
+    private String _basePath;
 
     private enum Sort {
         // @formatter:off
@@ -54,32 +55,18 @@ public abstract class RequestHelper {
         }
     }
 
-    /**
-     * Get Subscriptions.
-     * 
-     * @param tags
-     */
-    public SubscriptionList getSubscriptions(String[] tags) throws APIException {
-        return getSubscriptions(tags, null);
+    public RequestHelper(Client client, String basePath) {
+        _client = client;
+        _basePath = basePath;
     }
 
     /**
      * Get Subscriptions.
      * 
-     * @param tags
-     * @param sort
-     */
-    public SubscriptionList getSubscriptions(String[] tags, Sort[] sort) throws APIException {
-        return getSubscriptions(tags, sort, null, null);
-    }
-
-    /**
-     * Get Subscriptions.
-     * 
-     * @param tags
-     * @param sort
-     * @param limit
-     * @param offset
+     * @param tags      Array of tags.
+     * @param sort      Optional. Pass <b>null</b> to use default value.
+     * @param limit     Optional. Pass <b>null</b> to use default value.
+     * @param offset    Optional. Pass <b>null</b> to use default value.
      */
     public SubscriptionList getSubscriptions(String[] tags, Sort[] sort, Integer limit, Integer offset) throws APIException {
         try {
@@ -96,7 +83,7 @@ public abstract class RequestHelper {
             }
 
             HttpEntity entity = new UrlEncodedFormEntity(params);
-            JSONObject object = _client._getAPIClient().post(_getBasePath() + "/subscriptions", entity, false);
+            JSONObject object = _client._post(_getBasePath() + "/subscriptions", entity, false);
 
             return _parseSubscriptionList(object);
         } catch (Exception e) {
@@ -117,15 +104,15 @@ public abstract class RequestHelper {
      * 
      * @param channelCode
      */
-    public Channel getSubscription(String channelCode) throws APIException {
+    public Subscription getSubscription(String channelCode) throws APIException {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("channelCode", channelCode));
 
             HttpEntity entity = new UrlEncodedFormEntity(params);
-            JSONObject object = _client._getAPIClient().post(_getBasePath() + "/subscriptions", entity, false);
+            JSONObject object = _client._post(_getBasePath() + "/subscriptions", entity, false);
 
-            return _parseChannel(object);
+            return _parseSubscription(object);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, String.format("Error getting subscription on channel '%s' for user or endpoint", channelCode), e);
@@ -151,13 +138,15 @@ public abstract class RequestHelper {
      * 
      * @param channelCode
      */
-    public void subscribe(String channelCode) throws APIException {
+    public Subscription subscribe(String channelCode) throws APIException {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("channelCode", channelCode));
 
             HttpEntity entity = new UrlEncodedFormEntity(params);
-            _client._getAPIClient().post(_getBasePath() + "/subscriptions", entity, false);
+            JSONObject object = _client._post(_getBasePath() + "/subscriptions", entity, false);
+            
+            return _parseSubscription(object);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error subscribing user or endpoint", e);
@@ -178,7 +167,7 @@ public abstract class RequestHelper {
      */
     public void unsubscribe(String channelCode) throws APIException {
         try {
-            _client._getAPIClient().delete(_getBasePath() + "/subscriptions/" + channelCode, false);
+            _client._delete(_getBasePath() + "/subscriptions/" + channelCode, false);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error unsubscribing user or endpoint", e);
@@ -195,7 +184,9 @@ public abstract class RequestHelper {
     /**
      * Get base path.
      */
-    protected abstract String _getBasePath();
+    private String _getBasePath() {
+        return _basePath;
+    }
 
     /**
      * Parse SubscriptionList.
@@ -205,7 +196,7 @@ public abstract class RequestHelper {
         try {
             subscriptionList.setTotal(APIUtils.getInt(object, "total", 0));
             subscriptionList.setCount(APIUtils.getInt(object, "count", 0));
-            subscriptionList.setSubscriptions(_parseSubscription(object.getJSONArray("items")));
+            subscriptionList.setSubscriptions(_parseSubscriptions(object.getJSONArray("items")));
         } catch (JSONException e) {
             if (DEBUG) {
                 Log.e(TAG, "Error parsing subscriptionlist", e);
@@ -216,9 +207,9 @@ public abstract class RequestHelper {
     }
 
     /**
-     * Parse Subscription.
+     * Parse Subscriptions.
      */
-    private Subscription[] _parseSubscription(JSONArray array) {
+    private Subscription[] _parseSubscriptions(JSONArray array) {
         List<Subscription> subscriptions = new ArrayList<Subscription>();
         for (int i = 0; i < array.length(); i++) {
             try {
@@ -233,6 +224,16 @@ public abstract class RequestHelper {
         }
 
         return subscriptions.toArray(new Subscription[0]);
+    }
+    
+    /**
+     * Parse Subscription.
+     */
+    private Subscription _parseSubscription(JSONObject object) {
+        Subscription subscription = new Subscription();
+        subscription.setChannel(_parseChannel(APIUtils.getObject(object, "channel", null)));
+
+        return subscription;
     }
 
     /**
