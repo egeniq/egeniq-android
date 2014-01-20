@@ -32,17 +32,16 @@ public class UserRequestHelper extends RequestHelper {
      * Constructor
      */
     public UserRequestHelper(Client client, String userToken) {
-        super(client, "userss/" + userToken);
+        super(client, "/users/" + userToken);
     }
 
     /**
      * Get Endpoints.
      * 
-     * @param userToken
      * @param sort Optional. Pass <b>null</b> to use default value.
      * @param limit Optional. Pass <b>null</b> to use default value.
      */
-    public ItemList<Endpoint> getEndpoints(String userToken, Integer limit, Integer offset) throws APIException {
+    public ItemList<Endpoint> getEndpoints(Integer limit, Integer offset) throws APIException {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             if (limit != null) {

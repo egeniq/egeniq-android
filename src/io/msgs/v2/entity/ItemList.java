@@ -43,6 +43,13 @@ public class ItemList<T> {
     public T get(int index) {
         return _items[index];
     }
+    
+    /**
+     * Get items.
+     */
+    public T[] getItems() {
+        return _items;
+    }
 
     /**
      * Set items.

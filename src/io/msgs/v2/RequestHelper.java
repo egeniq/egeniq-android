@@ -32,7 +32,7 @@ public abstract class RequestHelper {
     protected Client _client;
     protected String _basePath;
 
-    private enum Sort {
+    public enum Sort {
         // @formatter:off
         CREATED_AT("createdAt"), 
         CHANNEL_CREATED_AT("channel.createdAt"), 
@@ -55,6 +55,12 @@ public abstract class RequestHelper {
         }
     }
 
+    /**
+     * Constructor.
+     * 
+     * @param client
+     * @param basePath
+     */
     public RequestHelper(Client client, String basePath) {
         _client = client;
         _basePath = basePath;
