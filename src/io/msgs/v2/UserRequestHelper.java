@@ -11,9 +11,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
-import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.NameValuePair;
-import ch.boye.httpclientandroidlib.client.entity.UrlEncodedFormEntity;
+import ch.boye.httpclientandroidlib.client.utils.URLEncodedUtils;
 import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
 
 import com.egeniq.BuildConfig;
@@ -33,6 +32,7 @@ public class UserRequestHelper extends RequestHelper {
      */
     public UserRequestHelper(Client client, String userToken) {
         super(client, "/users/" + userToken);
+        _userToken = userToken;
     }
 
     /**
@@ -50,9 +50,9 @@ public class UserRequestHelper extends RequestHelper {
             if (offset != null) {
                 params.add(new BasicNameValuePair("offset", String.valueOf(offset)));
             }
+            String param = URLEncodedUtils.format(params, "utf-8");
 
-            HttpEntity entity = new UrlEncodedFormEntity(params);
-            JSONObject object = _client._post(_getBasePath() + "/endpoints", entity, false);
+            JSONObject object = _client._get(_getBasePath() + "/endpoints" + param, false);
 
             return _parseEndpointList(object);
         } catch (Exception e) {
@@ -68,9 +68,13 @@ public class UserRequestHelper extends RequestHelper {
         }
     }
 
+    /**
+     * Get endpoint helper.
+     * 
+     * @param endpointToken
+     */
     public EndpointRequestHelper endpoint(String endpointToken) {
-        // TODO
-        return null;
+        return new EndpointRequestHelper(_client, _userToken, endpointToken);
     }
 
     /**

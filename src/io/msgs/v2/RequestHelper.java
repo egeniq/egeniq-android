@@ -16,6 +16,7 @@ import android.util.Log;
 import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.NameValuePair;
 import ch.boye.httpclientandroidlib.client.entity.UrlEncodedFormEntity;
+import ch.boye.httpclientandroidlib.client.utils.URLEncodedUtils;
 import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
 
 import com.egeniq.BuildConfig;
@@ -31,6 +32,9 @@ public abstract class RequestHelper {
 
     protected Client _client;
     protected String _basePath;
+    
+    protected String _userToken;
+    protected String _endpointToken;
 
     public enum Sort {
         // @formatter:off
@@ -87,9 +91,9 @@ public abstract class RequestHelper {
             if (sort != null) {
                 params.add(new BasicNameValuePair("sort", TextUtils.join(",", sort)));
             }
+            String param = URLEncodedUtils.format(params, "utf-8");
 
-            HttpEntity entity = new UrlEncodedFormEntity(params);
-            JSONObject object = _client._post(_getBasePath() + "/subscriptions", entity, false);
+            JSONObject object = _client._get(_getBasePath() + "/subscriptions" + param, false);
 
             return _parseSubscriptionList(object);
         } catch (Exception e) {
@@ -114,9 +118,9 @@ public abstract class RequestHelper {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("channelCode", channelCode));
+            String param = URLEncodedUtils.format(params, "utf-8");
 
-            HttpEntity entity = new UrlEncodedFormEntity(params);
-            JSONObject object = _client._post(_getBasePath() + "/subscriptions", entity, false);
+            JSONObject object = _client._get(_getBasePath() + "/subscriptions" + param, false);
 
             return _parseSubscription(object);
         } catch (Exception e) {

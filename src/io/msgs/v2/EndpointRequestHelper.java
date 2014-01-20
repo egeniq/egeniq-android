@@ -27,6 +27,16 @@ public class EndpointRequestHelper extends RequestHelper {
      */
     public EndpointRequestHelper(Client client, String endpointToken) {
         super(client, "/endpoints/" + endpointToken);
+        _endpointToken = endpointToken;
+    }
+
+    /**
+     * Constructor
+     */
+    public EndpointRequestHelper(Client client, String userToken, String endpointToken) {
+        super(client, "users" + userToken + "/endpoints/" + endpointToken);
+        _userToken = userToken;
+        _endpointToken = endpointToken;
     }
 
     /**
