@@ -1,13 +1,13 @@
 package io.msgs.v2.entity;
 
 /**
- * SubscriptionList enitiy.
- *
+ * ItemList enitiy.
+ * 
  */
-public class SubscriptionList {
+public class ItemList<T> {
     private int _total;
     private int _count;
-    private Subscription[] _subscriptions;
+    private T[] _items;
 
     /**
      * Get total.
@@ -38,17 +38,24 @@ public class SubscriptionList {
     }
 
     /**
-     * Get subscriptions
+     * Get item for index.
      */
-    public Subscription[] getSubscriptions() {
-        return _subscriptions;
+    public T get(int index) {
+        return _items[index];
+    }
+    
+    /**
+     * Get items.
+     */
+    public T[] getItems() {
+        return _items;
     }
 
     /**
-     * Set subscriptions
+     * Set items.
      */
-    public void setSubscriptions(Subscription[] subscriptions) {
-        _subscriptions = subscriptions;
+    public void setItems(T[] items) {
+        _items = items;
     }
 
 }

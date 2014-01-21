@@ -1,8 +1,8 @@
 package io.msgs.v2;
 
 import io.msgs.v2.entity.Channel;
+import io.msgs.v2.entity.ItemList;
 import io.msgs.v2.entity.Subscription;
-import io.msgs.v2.entity.SubscriptionList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +16,7 @@ import android.util.Log;
 import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.NameValuePair;
 import ch.boye.httpclientandroidlib.client.entity.UrlEncodedFormEntity;
+import ch.boye.httpclientandroidlib.client.utils.URLEncodedUtils;
 import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
 
 import com.egeniq.BuildConfig;
@@ -29,10 +30,13 @@ public abstract class RequestHelper {
     private final static String TAG = RequestHelper.class.getSimpleName();
     private final static boolean DEBUG = BuildConfig.DEBUG;
 
-    private Client _client;
-    private String _basePath;
+    protected Client _client;
+    protected String _basePath;
+    
+    protected String _userToken;
+    protected String _endpointToken;
 
-    private enum Sort {
+    public enum Sort {
         // @formatter:off
         CREATED_AT("createdAt"), 
         CHANNEL_CREATED_AT("channel.createdAt"), 
@@ -55,6 +59,12 @@ public abstract class RequestHelper {
         }
     }
 
+    /**
+     * Constructor.
+     * 
+     * @param client
+     * @param basePath
+     */
     public RequestHelper(Client client, String basePath) {
         _client = client;
         _basePath = basePath;
@@ -68,7 +78,7 @@ public abstract class RequestHelper {
      * @param limit     Optional. Pass <b>null</b> to use default value.
      * @param offset    Optional. Pass <b>null</b> to use default value.
      */
-    public SubscriptionList getSubscriptions(String[] tags, Sort[] sort, Integer limit, Integer offset) throws APIException {
+    public ItemList<Subscription> getSubscriptions(String[] tags, Sort[] sort, Integer limit, Integer offset) throws APIException {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("tags", TextUtils.join(",", tags)));
@@ -81,9 +91,9 @@ public abstract class RequestHelper {
             if (sort != null) {
                 params.add(new BasicNameValuePair("sort", TextUtils.join(",", sort)));
             }
+            String query = URLEncodedUtils.format(params, "utf-8");
 
-            HttpEntity entity = new UrlEncodedFormEntity(params);
-            JSONObject object = _client._post(_getBasePath() + "/subscriptions", entity, false);
+            JSONObject object = _client._get(_getBasePath() + "/subscriptions" + query, false);
 
             return _parseSubscriptionList(object);
         } catch (Exception e) {
@@ -108,9 +118,9 @@ public abstract class RequestHelper {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("channelCode", channelCode));
+            String param = URLEncodedUtils.format(params, "utf-8");
 
-            HttpEntity entity = new UrlEncodedFormEntity(params);
-            JSONObject object = _client._post(_getBasePath() + "/subscriptions", entity, false);
+            JSONObject object = _client._get(_getBasePath() + "/subscriptions" + param, false);
 
             return _parseSubscription(object);
         } catch (Exception e) {
@@ -184,26 +194,26 @@ public abstract class RequestHelper {
     /**
      * Get base path.
      */
-    private String _getBasePath() {
+    protected String _getBasePath() {
         return _basePath;
     }
 
     /**
      * Parse SubscriptionList.
      */
-    private SubscriptionList _parseSubscriptionList(JSONObject object) {
-        SubscriptionList subscriptionList = new SubscriptionList();
+    private ItemList<Subscription> _parseSubscriptionList(JSONObject object) {
+        ItemList<Subscription> list = new ItemList<Subscription>();
         try {
-            subscriptionList.setTotal(APIUtils.getInt(object, "total", 0));
-            subscriptionList.setCount(APIUtils.getInt(object, "count", 0));
-            subscriptionList.setSubscriptions(_parseSubscriptions(object.getJSONArray("items")));
+            list.setTotal(APIUtils.getInt(object, "total", 0));
+            list.setCount(APIUtils.getInt(object, "count", 0));
+            list.setItems(_parseSubscriptions(object.getJSONArray("items")));
         } catch (JSONException e) {
             if (DEBUG) {
                 Log.e(TAG, "Error parsing subscriptionlist", e);
             }
         }
 
-        return subscriptionList;
+        return list;
     }
 
     /**
