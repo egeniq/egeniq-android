@@ -1,9 +1,9 @@
 package io.msgs.v2;
 
-import io.msgs.v2.entity.Endpoint;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.json.JSONObject;
 
 import android.util.Log;
 import ch.boye.httpclientandroidlib.HttpEntity;
@@ -42,17 +42,25 @@ public class EndpointRequestHelper extends RequestHelper {
     /**
      * Update endpoint.
      */
-    public void update(Endpoint endpoint) throws APIException {
+    public void update(String address, Boolean endpointSubscriptionsActive, Boolean userSubscriptionsActive, JSONObject data) throws APIException {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("endpointToken", endpoint.getToken()));
-            params.add(new BasicNameValuePair("address", endpoint.getAddress()));
-            params.add(new BasicNameValuePair("endpointSubscriptionsActive", endpoint.isEndpointSubscriptionsActive() ? "1" : "0"));
-            params.add(new BasicNameValuePair("userSubscriptionsActive", endpoint.isUserSubscriptionsActive() ? "1" : "0"));
-            params.add(new BasicNameValuePair("data", endpoint.getData().toString()));
+            params.add(new BasicNameValuePair("endpointToken", _endpointToken));
+            if (address != null) {
+                params.add(new BasicNameValuePair("address", address));
+            }
+            if (endpointSubscriptionsActive != null) {
+                params.add(new BasicNameValuePair("endpointSubscriptionsActive", endpointSubscriptionsActive ? "1" : "0"));    
+            }
+            if (userSubscriptionsActive != null) {
+                params.add(new BasicNameValuePair("userSubscriptionsActive", userSubscriptionsActive ? "1" : "0"));    
+            }
+            if (data != null) {
+                params.add(new BasicNameValuePair("data", data.toString()));
+            }
 
             HttpEntity entity = new UrlEncodedFormEntity(params);
-            _client._post("/endpoints/" + endpoint.getToken(), entity, false);
+            _client._post("/endpoints/" + _endpointToken, entity, false);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error updating endpoint", e);
@@ -69,9 +77,9 @@ public class EndpointRequestHelper extends RequestHelper {
     /**
      * Delete endpoint.
      */
-    public void delete(Endpoint endpoint) throws APIException {
+    public void delete() throws APIException {
         try {
-            _client._delete("/endpoints/" + endpoint.getToken(), false);
+            _client._delete("/endpoints/" + _endpointToken, false);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error deleting endpoint", e);

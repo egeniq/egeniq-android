@@ -54,7 +54,7 @@ public class ItemList<T> {
     /**
      * Set items.
      */
-    public void set(T[] items) {
+    public void setItems(T[] items) {
         _items = items;
     }
 

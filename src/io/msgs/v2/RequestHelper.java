@@ -91,9 +91,9 @@ public abstract class RequestHelper {
             if (sort != null) {
                 params.add(new BasicNameValuePair("sort", TextUtils.join(",", sort)));
             }
-            String param = URLEncodedUtils.format(params, "utf-8");
+            String query = URLEncodedUtils.format(params, "utf-8");
 
-            JSONObject object = _client._get(_getBasePath() + "/subscriptions" + param, false);
+            JSONObject object = _client._get(_getBasePath() + "/subscriptions" + query, false);
 
             return _parseSubscriptionList(object);
         } catch (Exception e) {
@@ -202,18 +202,18 @@ public abstract class RequestHelper {
      * Parse SubscriptionList.
      */
     private ItemList<Subscription> _parseSubscriptionList(JSONObject object) {
-        ItemList<Subscription> subscriptionList = new ItemList<Subscription>();
+        ItemList<Subscription> list = new ItemList<Subscription>();
         try {
-            subscriptionList.setTotal(APIUtils.getInt(object, "total", 0));
-            subscriptionList.setCount(APIUtils.getInt(object, "count", 0));
-            subscriptionList.set(_parseSubscriptions(object.getJSONArray("items")));
+            list.setTotal(APIUtils.getInt(object, "total", 0));
+            list.setCount(APIUtils.getInt(object, "count", 0));
+            list.setItems(_parseSubscriptions(object.getJSONArray("items")));
         } catch (JSONException e) {
             if (DEBUG) {
                 Log.e(TAG, "Error parsing subscriptionlist", e);
             }
         }
 
-        return subscriptionList;
+        return list;
     }
 
     /**

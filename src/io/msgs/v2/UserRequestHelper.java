@@ -50,9 +50,9 @@ public class UserRequestHelper extends RequestHelper {
             if (offset != null) {
                 params.add(new BasicNameValuePair("offset", String.valueOf(offset)));
             }
-            String param = URLEncodedUtils.format(params, "utf-8");
+            String query = URLEncodedUtils.format(params, "utf-8");
 
-            JSONObject object = _client._get(_getBasePath() + "/endpoints" + param, false);
+            JSONObject object = _client._get(_getBasePath() + "/endpoints" + query, false);
 
             return _parseEndpointList(object);
         } catch (Exception e) {
@@ -81,18 +81,18 @@ public class UserRequestHelper extends RequestHelper {
      * Parse EndpointList.
      */
     private ItemList<Endpoint> _parseEndpointList(JSONObject object) {
-        ItemList<Endpoint> subscriptionList = new ItemList<Endpoint>();
+        ItemList<Endpoint> list = new ItemList<Endpoint>();
         try {
-            subscriptionList.setTotal(APIUtils.getInt(object, "total", 0));
-            subscriptionList.setCount(APIUtils.getInt(object, "count", 0));
-            subscriptionList.set(_parseEndpoints(object.getJSONArray("items")));
+            list.setTotal(APIUtils.getInt(object, "total", 0));
+            list.setCount(APIUtils.getInt(object, "count", 0));
+            list.setItems(_parseEndpoints(object.getJSONArray("items")));
         } catch (JSONException e) {
             if (DEBUG) {
                 Log.e(TAG, "Error parsing endpointlist", e);
             }
         }
 
-        return subscriptionList;
+        return list;
     }
 
     /**
