@@ -50,7 +50,7 @@ public class UserRequestHelper extends RequestHelper {
             if (offset != null) {
                 params.add(new BasicNameValuePair("offset", String.valueOf(offset)));
             }
-            String query = URLEncodedUtils.format(params, "utf-8");
+            String query = (!params.isEmpty() ? "?" + URLEncodedUtils.format(params, "utf-8") : URLEncodedUtils.format(params, "utf-8"));
 
             JSONObject object = _client._get(_getBasePath() + "/endpoints" + query, false);
 
