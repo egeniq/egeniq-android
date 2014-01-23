@@ -91,7 +91,7 @@ public abstract class RequestHelper {
             if (sort != null) {
                 params.add(new BasicNameValuePair("sort", TextUtils.join(",", sort)));
             }
-            String query = URLEncodedUtils.format(params, "utf-8");
+            String query = !params.isEmpty() ? "?" + URLEncodedUtils.format(params, "utf-8") : "";
 
             JSONObject object = _client._get(_getBasePath() + "/subscriptions" + query, false);
 
@@ -118,9 +118,9 @@ public abstract class RequestHelper {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("channelCode", channelCode));
-            String param = URLEncodedUtils.format(params, "utf-8");
+            String query = !params.isEmpty() ? "?" + URLEncodedUtils.format(params, "utf-8") : "";
 
-            JSONObject object = _client._get(_getBasePath() + "/subscriptions" + param, false);
+            JSONObject object = _client._get(_getBasePath() + "/subscriptions" + query, false);
 
             return _parseSubscription(object);
         } catch (Exception e) {
