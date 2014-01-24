@@ -1,0 +1,41 @@
+/**
+ * Create AAR for deployment in Maven Repository
+ */
+
+apply plugin: 'maven'
+
+def getReleaseRepositoryUrl() {
+    return hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL : ("file:///" + buildDir + "/mvn-repo/release")
+}
+
+def getSnapshotRepositoryUrl() {
+    return hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL : ("file:///" + buildDir + "/mvn-repo/snapshot")
+}
+
+afterEvaluate { project ->
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                repository url: getReleaseRepositoryUrl()
+
+                snapshotRepository url: getSnapshotRepositoryUrl()
+
+                pom.project {
+                    groupId     'com.egeniq'
+                    artifactId  'android-library'
+                    version     '1.0' // Add "-SNAPSHOT" suffix to create snapshot version
+                    packaging   'aar'
+                    name        'Egeniq Library'
+                    description 'Egeniq Library for Android projects'
+
+                    developers {
+                        developer {
+                            id 'Egeniq'
+                            name 'Egeniq B.V.'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
