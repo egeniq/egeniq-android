@@ -11,7 +11,7 @@ import com.egeniq.utils.FontLoader;
 /**
  * Custom RadioButton to enable setting custom fonts
  * 
- * @author …zcan Kaymak
+ * @author Ã–zcan Kaymak
  */
 public class RadioButton extends android.widget.RadioButton {
 
