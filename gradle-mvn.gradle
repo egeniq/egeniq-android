@@ -4,21 +4,13 @@
 
 apply plugin: 'maven'
 
-def getReleaseRepositoryUrl() {
-    return hasProperty('RELEASE_REPOSITORY_URL') ? RELEASE_REPOSITORY_URL : ("file:///" + buildDir + "/mvn-repo/release")
-}
-
-def getSnapshotRepositoryUrl() {
-    return hasProperty('SNAPSHOT_REPOSITORY_URL') ? SNAPSHOT_REPOSITORY_URL : ("file:///" + buildDir + "/mvn-repo/snapshot")
-}
-
 afterEvaluate { project ->
     uploadArchives {
         repositories {
             mavenDeployer {
-                repository url: getReleaseRepositoryUrl()
+                repository url:         "file:///" + buildDir + "/mvn-repo/release"
 
-                snapshotRepository url: getSnapshotRepositoryUrl()
+                snapshotRepository url: "file:///" + buildDir + "/mvn-repo/snapshot"
 
                 pom.project {
                     groupId     'com.egeniq'
