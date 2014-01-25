@@ -8,9 +8,7 @@ afterEvaluate { project ->
     uploadArchives {
         repositories {
             mavenDeployer {
-                repository url:         "file:///" + buildDir + "/mvn-repo/release"
-
-                snapshotRepository url: "file:///" + buildDir + "/mvn-repo/snapshot"
+                repository url: "file:///" + buildDir + "/mvn-repo"
 
                 pom.project {
                     groupId     'com.egeniq'
