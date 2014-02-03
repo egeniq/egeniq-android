@@ -4,125 +4,121 @@ import org.json.JSONObject;
 
 /**
  * Endpoint entity.
- *
  */
-public class Endpoint {
-    private String _token;
-    private String _type;
-    private String _address;
-    private String _name;
-    private boolean _endpointSubscriptionsActive;
-    private boolean _userSubscriptionsActive;
-    private JSONObject _data;
-    
+public class Endpoint extends AbstractEntity {
+    /**
+     * Constructor.
+     */
     public Endpoint() {
+        super();
+        setEndpointSubscriptionsActive(true);
+        setUserSubscriptionsActive(true);
     }
-    
-    public Endpoint(String token, String type, String address, String name, boolean endpointSubscriptionsActive, boolean userSubscriptionsActive, JSONObject data) {
-        _token = token;
-        _type = type;
-        _address = address;
-        _name = name;
-        _endpointSubscriptionsActive = endpointSubscriptionsActive;
-        _userSubscriptionsActive = userSubscriptionsActive;
-        _data = data;
+
+    /**
+     * Constructor.
+     * 
+     * @param data
+     */
+    public Endpoint(JSONObject data) {
+        super(data);
     }
 
     /**
      * Get Token.
      */
     public String getToken() {
-        return _token;
+        return _getString("token");
     }
 
     /**
      * Set Token.
      */
     public void setToken(String token) {
-        _token = token;
+        _putString("token", token);
     }
 
     /**
      * Get Type
      */
     public String getType() {
-        return _type;
+        return _getString("type");
     }
 
     /**
      * Set Type.
      */
     public void setType(String type) {
-        _type = type;
+        _putString("type", type);
     }
 
     /**
      * Get Adddress.
      */
     public String getAddress() {
-        return _address;
+        return _getString("address");
     }
 
     /**
      * Set Address.
      */
     public void setAddress(String address) {
-        _address = address;
+        _putString("address", address);
     }
 
     /**
      * Get Name.
      */
     public String getName() {
-        return _name;
+        return _getString("name");
     }
 
     /**
      * Set Name.
      */
     public void setName(String name) {
-        _name = name;
+        _putString("name", name);
     }
 
     /**
      * Set EndpointSubscriptionsActive.
      */
-    public boolean isEndpointSubscriptionsActive() {
-        return _endpointSubscriptionsActive;
+    public Boolean getEndpointSubscriptionsActive() {
+        return _getBoolean("endpointSubscriptionsActive");
     }
 
     /**
      * Get EndpointSubscriptionsActive.
      */
-    public void setEndpointSubscriptionsActive(boolean endpointSubscriptionsActive) {
-        _endpointSubscriptionsActive = endpointSubscriptionsActive;
+    public void setEndpointSubscriptionsActive(Boolean endpointSubscriptionsActive) {
+        _putBoolean("endpointSubscriptionsActive", endpointSubscriptionsActive);
     }
 
     /**
      * Get UserSubscriptionsActive.
      */
-    public boolean isUserSubscriptionsActive() {
-        return _userSubscriptionsActive;
+    public Boolean getUserSubscriptionsActive() {
+        return _getBoolean("userSubscriptionsActive");
     }
 
     /**
      * Set UserSubscriptionsActive.
      */
-    public void setUserSubscriptionsActive(boolean userSubscriptionsActive) {
-        _userSubscriptionsActive = userSubscriptionsActive;
+    public void setUserSubscriptionsActive(Boolean userSubscriptionsActive) {
+        _putBoolean("userSubscriptionsActive", userSubscriptionsActive);
     }
 
     /**
      * Get Data.
      */
     public JSONObject getData() {
-        return _data;
+        return _getObject("data");
     }
 
     /**
      * Set Data.
      */
     public void setData(JSONObject data) {
-        _data = data;
+        _putObject("data", data);
     }
 }

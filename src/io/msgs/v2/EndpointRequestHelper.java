@@ -1,15 +1,10 @@
 package io.msgs.v2;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.msgs.v2.entity.Endpoint;
 
 import org.json.JSONObject;
 
 import android.util.Log;
-import ch.boye.httpclientandroidlib.HttpEntity;
-import ch.boye.httpclientandroidlib.NameValuePair;
-import ch.boye.httpclientandroidlib.client.entity.UrlEncodedFormEntity;
-import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
 
 import com.egeniq.BuildConfig;
 import com.egeniq.utils.api.APIException;
@@ -26,41 +21,43 @@ public class EndpointRequestHelper extends RequestHelper {
      * Constructor
      */
     public EndpointRequestHelper(Client client, String endpointToken) {
-        super(client, "/endpoints/" + endpointToken);
-        _endpointToken = endpointToken;
+        super(client, "endpoints" + endpointToken);
     }
 
     /**
      * Constructor
      */
-    public EndpointRequestHelper(Client client, String userToken, String endpointToken) {
-        super(client, "users" + userToken + "/endpoints/" + endpointToken);
-        _userToken = userToken;
-        _endpointToken = endpointToken;
+    public EndpointRequestHelper(Client client, String endpointToken, String basePath) {
+        super(client, basePath + "/endpoints/" + endpointToken);
+    }
+
+    /**
+     * Fetch endpoint.
+     */
+    public Endpoint fetch() throws APIException {
+        try {
+            JSONObject object = _get(null, null);
+            return new Endpoint(object);
+        } catch (Exception e) {
+            if (DEBUG) {
+                Log.e(TAG, "Error fetching endpoint", e);
+            }
+
+            if (!(e instanceof APIException)) {
+                e = new APIException(e);
+            }
+
+            throw (APIException)e;
+        }
     }
 
     /**
      * Update endpoint.
      */
-    public void update(String address, Boolean endpointSubscriptionsActive, Boolean userSubscriptionsActive, JSONObject data) throws APIException {
+    public Endpoint update(JSONObject data) throws APIException {
         try {
-            List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("endpointToken", _endpointToken));
-            if (address != null) {
-                params.add(new BasicNameValuePair("address", address));
-            }
-            if (endpointSubscriptionsActive != null) {
-                params.add(new BasicNameValuePair("endpointSubscriptionsActive", endpointSubscriptionsActive ? "1" : "0"));    
-            }
-            if (userSubscriptionsActive != null) {
-                params.add(new BasicNameValuePair("userSubscriptionsActive", userSubscriptionsActive ? "1" : "0"));    
-            }
-            if (data != null) {
-                params.add(new BasicNameValuePair("data", data.toString()));
-            }
-
-            HttpEntity entity = new UrlEncodedFormEntity(params);
-            _client._post("/endpoints/" + _endpointToken, entity, false);
+            JSONObject object = _post(null, _client._getParams(data));
+            return new Endpoint(object);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error updating endpoint", e);
@@ -79,7 +76,7 @@ public class EndpointRequestHelper extends RequestHelper {
      */
     public void delete() throws APIException {
         try {
-            _client._delete("/endpoints/" + _endpointToken, false);
+            _client._delete(null);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error deleting endpoint", e);
@@ -92,5 +89,4 @@ public class EndpointRequestHelper extends RequestHelper {
             throw (APIException)e;
         }
     }
-
 }

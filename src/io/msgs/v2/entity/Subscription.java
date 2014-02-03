@@ -1,23 +1,42 @@
 package io.msgs.v2.entity;
 
+import org.json.JSONObject;
+
 /**
  * Subscription entity.
  */
-public class Subscription {
-    private Channel _channel;
+public class Subscription extends AbstractEntity {
+    /**
+     * Constructor.
+     */
+    public Subscription() {
+        super();
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param data
+     */
+    public Subscription(JSONObject data) {
+        super(data);
+    }
 
     /**
      * Get channel.
      */
     public Channel getChannel() {
-        return _channel;
+        if (_getObject("channel") != null) {
+            return new Channel(_getObject("channel"));
+        } else {
+            return null;
+        }
     }
 
     /**
      * Set channel.
      */
     public void setChannel(Channel channel) {
-        _channel = channel;
+        _putObject("channel", channel != null ? channel._data : null);
     }
-
 }
