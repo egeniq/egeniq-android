@@ -1,27 +1,20 @@
 package io.msgs.v2;
 
-import io.msgs.v2.entity.Channel;
 import io.msgs.v2.entity.ItemList;
 import io.msgs.v2.entity.Subscription;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.text.TextUtils;
 import android.util.Log;
-import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.NameValuePair;
-import ch.boye.httpclientandroidlib.client.entity.UrlEncodedFormEntity;
-import ch.boye.httpclientandroidlib.client.utils.URLEncodedUtils;
 import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
 
 import com.egeniq.BuildConfig;
 import com.egeniq.utils.api.APIException;
-import com.egeniq.utils.api.APIUtils;
 
 /**
  * Base RequestHelper
@@ -30,11 +23,8 @@ public abstract class RequestHelper {
     private final static String TAG = RequestHelper.class.getSimpleName();
     private final static boolean DEBUG = BuildConfig.DEBUG;
 
-    protected Client _client;
-    protected String _basePath;
-    
-    protected String _userToken;
-    protected String _endpointToken;
+    private Client _client;
+    private String _basePath;
 
     public enum Sort {
         // @formatter:off
@@ -69,7 +59,40 @@ public abstract class RequestHelper {
         _client = client;
         _basePath = basePath;
     }
+    
+    /**
+     * Constructor.
+     * 
+     * @param client
+     * @param basePath
+     */
+    public RequestHelper(RequestHelper parent, String basePath) {
+        _client = parent._client;
+        _basePath = parent._basePath + "/" + basePath;
+    }    
 
+    /**
+     * Get subscription.
+     * 
+     * @param channelCode
+     */
+    public Subscription fetchSubscription(String channelCode) throws APIException {
+        try {
+            JSONObject object = _get("subscriptions/" + channelCode, null);
+            return new Subscription(object);
+        } catch (Exception e) {
+            if (DEBUG) {
+                Log.e(TAG, String.format("Error getting subscription on channel '%s' for user or endpoint", channelCode), e);
+            }
+
+            if (!(e instanceof APIException)) {
+                e = new APIException(e);
+            }
+
+            throw (APIException)e;
+        }
+    }    
+    
     /**
      * Get Subscriptions.
      * 
@@ -78,24 +101,26 @@ public abstract class RequestHelper {
      * @param limit     Optional. Pass <b>null</b> to use default value.
      * @param offset    Optional. Pass <b>null</b> to use default value.
      */
-    public ItemList<Subscription> getSubscriptions(String[] tags, Sort[] sort, Integer limit, Integer offset) throws APIException {
+    public ItemList<Subscription> fetchSubscriptions(String[] tags, Sort[] sort, Integer limit, Integer offset) throws APIException {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("tags", TextUtils.join(",", tags)));
+            
             if (limit != null) {
                 params.add(new BasicNameValuePair("limit", String.valueOf(limit)));
             }
+            
             if (offset != null) {
                 params.add(new BasicNameValuePair("offset", String.valueOf(offset)));
             }
+            
             if (sort != null) {
                 params.add(new BasicNameValuePair("sort", TextUtils.join(",", sort)));
             }
-            String query = !params.isEmpty() ? "?" + URLEncodedUtils.format(params, "utf-8") : "";
 
-            JSONObject object = _client._get(_getBasePath() + "/subscriptions" + query, false);
-
-            return _parseSubscriptionList(object);
+            JSONObject object = _get("subscriptions", params);
+            
+            return new ItemList<Subscription>(Subscription.class, object);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error getting subscriptions for user or endpoint", e);
@@ -110,40 +135,6 @@ public abstract class RequestHelper {
     }
 
     /**
-     * Get subscription.
-     * 
-     * @param channelCode
-     */
-    public Subscription getSubscription(String channelCode) throws APIException {
-        try {
-            List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("channelCode", channelCode));
-            String query = !params.isEmpty() ? "?" + URLEncodedUtils.format(params, "utf-8") : "";
-
-            JSONObject object = _client._get(_getBasePath() + "/subscriptions" + query, false);
-
-            return _parseSubscription(object);
-        } catch (Exception e) {
-            if (DEBUG) {
-                Log.e(TAG, String.format("Error getting subscription on channel '%s' for user or endpoint", channelCode), e);
-            }
-
-            if (!(e instanceof APIException)) {
-                e = new APIException(e);
-            }
-
-            throw (APIException)e;
-        }
-    }
-
-    /**
-     * Returns if subscription is available.
-     */
-    public boolean isSubscribed(String channelCode) throws APIException {
-        return getSubscription(channelCode) != null;
-    }
-
-    /**
      * Subscribe.
      * 
      * @param channelCode
@@ -153,10 +144,8 @@ public abstract class RequestHelper {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("channelCode", channelCode));
 
-            HttpEntity entity = new UrlEncodedFormEntity(params);
-            JSONObject object = _client._post(_getBasePath() + "/subscriptions", entity, false);
-            
-            return _parseSubscription(object);
+            JSONObject object = _post("subscriptions", params);
+            return new Subscription(object);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error subscribing user or endpoint", e);
@@ -177,7 +166,7 @@ public abstract class RequestHelper {
      */
     public void unsubscribe(String channelCode) throws APIException {
         try {
-            _client._delete(_getBasePath() + "/subscriptions/" + channelCode, false);
+            _delete("subscriptions/" + channelCode);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error unsubscribing user or endpoint", e);
@@ -190,70 +179,36 @@ public abstract class RequestHelper {
             throw (APIException)e;
         }
     }
-
-    /**
-     * Get base path.
-     */
-    protected String _getBasePath() {
-        return _basePath;
-    }
-
-    /**
-     * Parse SubscriptionList.
-     */
-    private ItemList<Subscription> _parseSubscriptionList(JSONObject object) {
-        ItemList<Subscription> list = new ItemList<Subscription>();
-        try {
-            list.setTotal(APIUtils.getInt(object, "total", 0));
-            list.setCount(APIUtils.getInt(object, "count", 0));
-            list.setItems(_parseSubscriptions(object.getJSONArray("items")));
-        } catch (JSONException e) {
-            if (DEBUG) {
-                Log.e(TAG, "Error parsing subscriptionlist", e);
-            }
-        }
-
-        return list;
-    }
-
-    /**
-     * Parse Subscriptions.
-     */
-    private Subscription[] _parseSubscriptions(JSONArray array) {
-        List<Subscription> subscriptions = new ArrayList<Subscription>();
-        for (int i = 0; i < array.length(); i++) {
-            try {
-                subscriptions.add(_parseSubscription(array.getJSONObject(i)));
-            } catch (JSONException e) {
-                if (DEBUG) {
-                    Log.e(TAG, "Error parsing subscription", e);
-                }
-            }
-        }
-
-        return subscriptions.toArray(new Subscription[0]);
-    }
     
     /**
-     * Parse Subscription.
+     * Perform a GET request with the ApiKey header.
      */
-    private Subscription _parseSubscription(JSONObject object) {
-        Subscription subscription = new Subscription();
-        subscription.setChannel(_parseChannel(APIUtils.getObject(object, "channel", null)));
-
-        return subscription;
+    protected JSONObject _get(String path, List<NameValuePair> params) throws APIException {
+        return _client._get(path == null ? _basePath : _basePath + "/" + path, params);
     }
 
     /**
-     * Parse Channel.
+     * Perform a POST request with the ApiKey header.
      */
-    private Channel _parseChannel(JSONObject object) {
-        Channel channel = new Channel();
-        channel.setCode(APIUtils.getString(object, "code", null));
-        channel.setName(APIUtils.getString(object, "name", null));
-        channel.setTags(APIUtils.getStringArray(object, "tags", null));
-        channel.setData(APIUtils.getObject(object, "data", null));
-
-        return channel;
+    protected JSONObject _post(String path, List<NameValuePair> params) throws APIException {
+        return _client._post(path == null ? _basePath : _basePath + "/" + path, params);
     }
+
+    /**
+     * Perform a DELETE request with the ApiKey header.
+     */
+    protected JSONObject _delete(String path) throws APIException {
+        return _client._delete(path == null ? _basePath : _basePath + "/" + path);
+    }    
+    
+    /**
+     * Convert JSON object to name value pairs.
+     * 
+     * @param properties
+     * 
+     * @return Name value pairs.
+     */
+    protected List<NameValuePair> _getParams(JSONObject data) {
+        return _client._getParams(data);
+    }    
 }

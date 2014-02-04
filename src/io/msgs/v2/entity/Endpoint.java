@@ -4,125 +4,126 @@ import org.json.JSONObject;
 
 /**
  * Endpoint entity.
- *
  */
-public class Endpoint {
-    private String _token;
-    private String _type;
-    private String _address;
-    private String _name;
-    private boolean _endpointSubscriptionsActive;
-    private boolean _userSubscriptionsActive;
-    private JSONObject _data;
-    
+public class Endpoint extends AbstractEntity {
+    /**
+     * Constructor.
+     */
     public Endpoint() {
+        super();
     }
-    
-    public Endpoint(String token, String type, String address, String name, boolean endpointSubscriptionsActive, boolean userSubscriptionsActive, JSONObject data) {
-        _token = token;
-        _type = type;
-        _address = address;
-        _name = name;
-        _endpointSubscriptionsActive = endpointSubscriptionsActive;
-        _userSubscriptionsActive = userSubscriptionsActive;
-        _data = data;
+
+    /**
+     * Constructor.
+     * 
+     * @param data
+     */
+    public Endpoint(JSONObject data) {
+        super(data);
     }
 
     /**
      * Get Token.
      */
     public String getToken() {
-        return _token;
+        return _getString("token");
     }
 
     /**
      * Set Token.
      */
-    public void setToken(String token) {
-        _token = token;
+    public Endpoint setToken(String token) {
+        _putString("token", token);
+        return this;
     }
 
     /**
      * Get Type
      */
     public String getType() {
-        return _type;
+        return _getString("type");
     }
 
     /**
      * Set Type.
      */
-    public void setType(String type) {
-        _type = type;
+    public Endpoint setType(String type) {
+        _putString("type", type);
+        return this;
     }
 
     /**
      * Get Adddress.
      */
     public String getAddress() {
-        return _address;
+        return _getString("address");
     }
 
     /**
      * Set Address.
      */
-    public void setAddress(String address) {
-        _address = address;
+    public Endpoint setAddress(String address) {
+        _putString("address", address);
+        return this;
     }
 
     /**
      * Get Name.
      */
     public String getName() {
-        return _name;
+        return _getString("name");
     }
 
     /**
      * Set Name.
      */
-    public void setName(String name) {
-        _name = name;
+    public Endpoint setName(String name) {
+        _putString("name", name);
+        return this;
     }
 
     /**
      * Set EndpointSubscriptionsActive.
      */
-    public boolean isEndpointSubscriptionsActive() {
-        return _endpointSubscriptionsActive;
+    public Boolean getEndpointSubscriptionsActive() {
+        return _getBoolean("endpointSubscriptionsActive");
     }
 
     /**
      * Get EndpointSubscriptionsActive.
      */
-    public void setEndpointSubscriptionsActive(boolean endpointSubscriptionsActive) {
-        _endpointSubscriptionsActive = endpointSubscriptionsActive;
+    public Endpoint setEndpointSubscriptionsActive(Boolean endpointSubscriptionsActive) {
+        _putBoolean("endpointSubscriptionsActive", endpointSubscriptionsActive);
+        return this;
     }
 
     /**
      * Get UserSubscriptionsActive.
      */
-    public boolean isUserSubscriptionsActive() {
-        return _userSubscriptionsActive;
+    public Boolean getUserSubscriptionsActive() {
+        return _getBoolean("userSubscriptionsActive");
     }
 
     /**
      * Set UserSubscriptionsActive.
      */
-    public void setUserSubscriptionsActive(boolean userSubscriptionsActive) {
-        _userSubscriptionsActive = userSubscriptionsActive;
+    public Endpoint setUserSubscriptionsActive(Boolean userSubscriptionsActive) {
+        _putBoolean("userSubscriptionsActive", userSubscriptionsActive);
+        return this;
     }
 
     /**
      * Get Data.
      */
     public JSONObject getData() {
-        return _data;
+        return _getObject("data");
     }
 
     /**
      * Set Data.
      */
-    public void setData(JSONObject data) {
-        _data = data;
+    public Endpoint setData(JSONObject data) {
+        _putObject("data", data);
+        return this;
     }
 }

@@ -4,84 +4,80 @@ import org.json.JSONObject;
 
 /**
  * Channel entity.
- *
+ * 
  */
-public class Channel {
-    private String _code;
-    private String _name;
-    private String[] _tags;
-    private JSONObject _data;
-
+public class Channel extends AbstractEntity {
     /**
      * Constructor.
      */
     public Channel() {
+        super();
     }
 
     /**
      * Constructor.
      */
-    public Channel(String code, String name, String[] tags, JSONObject data) {
-        _code = code;
-        _name = name;
-        _tags = tags;
-        _data = data;
+    public Channel(JSONObject data) {
+        super(data);
     }
 
     /**
      * Get code.
      */
     public String getCode() {
-        return _code;
+        return _getString("code");
     }
 
     /**
      * Set code.
      */
-    public void setCode(String code) {
-        _code = code;
+    public Channel setCode(String code) {
+        _putString("code", code);
+        return this;
     }
 
     /**
      * Get name.
      */
     public String getName() {
-        return _name;
+        return _getString("name");
     }
 
     /**
      * Set name.
      */
-    public void setName(String name) {
-        _name = name;
+    public Channel setName(String name) {
+        _putString("name", name);
+        return this;
     }
 
     /**
      * Get tags.
      */
     public String[] getTags() {
-        return _tags;
+        return _getStringArray("tags");
     }
 
     /**
      * Set tags.
      */
-    public void setTags(String[] tags) {
-        _tags = tags;
+    public Channel setTags(String[] tags) {
+        _putStringArray("tags", tags);
+        return this;
     }
 
     /**
      * Get data.
      */
     public JSONObject getData() {
-        return _data;
+        return _getObject("data");
     }
 
     /**
      * Set data.
      */
-    public void setData(JSONObject data) {
-        _data = data;
+    public Channel setData(JSONObject data) {
+        _putObject("data", data);
+        return this;
     }
-
 }

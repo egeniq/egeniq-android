@@ -1,29 +1,25 @@
 package io.msgs.v2;
 
-import io.msgs.v2.utils.Utils;
+import io.msgs.v2.entity.Endpoint;
+import io.msgs.v2.entity.User;
 
-import java.text.SimpleDateFormat;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 import ch.boye.httpclientandroidlib.Header;
-import ch.boye.httpclientandroidlib.HttpEntity;
 import ch.boye.httpclientandroidlib.NameValuePair;
 import ch.boye.httpclientandroidlib.client.entity.UrlEncodedFormEntity;
+import ch.boye.httpclientandroidlib.client.utils.URLEncodedUtils;
 import ch.boye.httpclientandroidlib.message.BasicHeader;
 import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
 
-import com.egeniq.BuildConfig;
-import com.egeniq.utils.api.APIClient;
 import com.egeniq.utils.api.APIException;
-import com.egeniq.utils.api.APIUtils;
 
 /**
  * Msgs client.
@@ -33,40 +29,31 @@ import com.egeniq.utils.api.APIUtils;
  */
 public class Client {
     private final static String TAG = Client.class.getSimpleName();
-    private final static boolean DEBUG = BuildConfig.DEBUG;
+    private final static boolean DEBUG = true; // BuildConfig.DEBUG;
 
-    private final static String MSGS_TAG = "Msgs";
-
-    private final static String KEY_ENDPOINT_ADDRESS = "deviceAdress";
-    private final static String KEY_ENDPOINT_TOKEN = "endpointToken";
-    private final static String KEY_USER_TOKEN = "userToken";
-    private final static String KEY_EXTERNAL_USER_ID = "externalUserId";
-
-    private final Context _context;
-    private final String _serviceBaseURL;
+    private final String _baseURL;
     private final String _apiKey;
-    private final String _deviceType;
 
     private APIClient _apiClient;
 
-    public final static SimpleDateFormat DATE_FORMAT;
-    static {
-        DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    private static class APIClient extends com.egeniq.utils.api.APIClient {
+        public APIClient(String baseURL) {
+            super(baseURL);
+            _setLoggingEnabled(DEBUG);
+            _setLoggingTag(getClass().getName());
+        }
     }
 
     /**
      * Constructor.
      * 
      * @param context
-     * @param serviceBaseURL
+     * @param baseURL
      * @param apiKey
      */
-    public Client(Context context, String serviceBaseURL, String apiKey, String deviceType) {
-        _context = context;
-        _serviceBaseURL = serviceBaseURL;
+    public Client(String baseURL, String apiKey) {
+        _baseURL = baseURL;
         _apiKey = apiKey;
-        _deviceType = deviceType;
     }
 
     /**
@@ -76,50 +63,28 @@ public class Client {
      */
     protected APIClient _getAPIClient() {
         if (_apiClient == null) {
-            _apiClient = new APIClient(_serviceBaseURL);
+            _apiClient = new APIClient(_baseURL);
         }
 
         return _apiClient;
     }
 
     /**
-     * Register device.
+     * Register endpoint.
      * 
-     * @param deviceId
+     * @param properties
+     * 
+     * @return Endpoint.
      * 
      * @throws APIException
      */
-    public void registerEndpoint(String address) throws APIException {
+    public Endpoint registerEndpoint(JSONObject data) throws APIException {
         try {
-            String endpointToken = _getPreference(KEY_ENDPOINT_TOKEN);
-            String userToken = _getPreference(KEY_USER_TOKEN);
-
-            if (endpointToken != null && address.equals(_getPreference(KEY_ENDPOINT_ADDRESS))) {
-                return;
-            }
-
-            List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("type", _getDeviceType()));
-            params.add(new BasicNameValuePair("address", address));
-            params.add(new BasicNameValuePair("name", Utils.getDeviceName()));
-            HttpEntity entity = new UrlEncodedFormEntity(params);
-            JSONObject object = null;
-
-            if (endpointToken != null && userToken != null) {
-                object = _post("/users/" + userToken + "/endpoints/" + endpointToken, entity, false);
-            } else if (endpointToken != null) {
-                object = _post("/endpoints" + endpointToken, entity, false);
-            } else if (userToken != null) {
-                object = _post("/users/" + userToken + "/endpoints/", entity, false);
-            } else {
-                object = _post("/endpoints", entity, false);
-            }
-
-            _setPreference(KEY_ENDPOINT_TOKEN, APIUtils.getString(object, "token", null));
-            _setPreference(KEY_ENDPOINT_ADDRESS, address);
+            JSONObject object = _post("endpoints", _getParams(data));
+            return new Endpoint(object);
         } catch (Exception e) {
             if (DEBUG) {
-                Log.e(TAG, "Error registering device", e);
+                Log.e(TAG, "Error registering endpoint", e);
             }
 
             if (!(e instanceof APIException)) {
@@ -131,40 +96,18 @@ public class Client {
     }
 
     /**
-     * Unregister device.
-     */
-    public void unregisterDevice() {
-        _setPreference(KEY_ENDPOINT_ADDRESS, null);
-    }
-
-    /**
      * Register user.
      * 
      * @param externalUserId
      * 
+     * @return User.
+     * 
      * @throws APIException
      */
-    public void registerUser(String externalUserId) throws APIException {
+    public User registerUser(JSONObject data) throws APIException {
         try {
-            String userToken = _getPreference(KEY_USER_TOKEN);
-
-            if (userToken != null && externalUserId.equals(_getPreference(KEY_EXTERNAL_USER_ID))) {
-                return;
-            }
-
-            List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("externalUserId", externalUserId));
-
-            HttpEntity entity = new UrlEncodedFormEntity(params);
-            JSONObject object = _post("/users", entity, false);
-            _setPreference(KEY_USER_TOKEN, APIUtils.getString(object, "token", null));
-            _setPreference(KEY_EXTERNAL_USER_ID, externalUserId);
-
-            String endpointAddress = _getPreference(KEY_ENDPOINT_ADDRESS);
-            if (endpointAddress != null) {
-                _setPreference(KEY_ENDPOINT_TOKEN, null);
-                registerEndpoint(endpointAddress);
-            }
+            JSONObject object = _post("users", _getParams(data));
+            return new User(object);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error registering user", e);
@@ -179,88 +122,81 @@ public class Client {
     }
 
     /**
-     * Unregister user.
-     */
-    public void unregisterUser() {
-        _setPreference(KEY_USER_TOKEN, null);
-    }
-
-    /**
-     * Get user.
-     */
-    public UserRequestHelper user() {
-        return new UserRequestHelper(this, _getPreference(KEY_USER_TOKEN));
-    }
-
-    /**
-     * Get endpoint.
-     */
-    public EndpointRequestHelper endpoint() {
-        return endpoint(_getPreference(KEY_ENDPOINT_TOKEN));
-    }
-
-    /**
-     * Get endpoint.
+     * User helper.
      * 
-     * @param endpointToken
+     * @param token User token.
      */
-    public EndpointRequestHelper endpoint(String endpointToken) {
-        return new EndpointRequestHelper(this, endpointToken);
+    public UserRequestHelper forUser(String token) {
+        return new UserRequestHelper(this, token);
     }
 
     /**
-     * Get value from shared preferences.
+     * Endpoint helper.
+     * 
+     * @param token Endpint token.
      */
-    private String _getPreference(String key) {
-        return _context.getSharedPreferences(MSGS_TAG, Context.MODE_PRIVATE).getString(key, null);
-    }
-
-    /**
-     * Save value in shared preferences. <br>
-     * If value is null, key will be removed.
-     */
-    private void _setPreference(String key, String value) {
-        SharedPreferences.Editor editor = _context.getSharedPreferences(MSGS_TAG, Context.MODE_PRIVATE).edit();
-        if (value == null) {
-            editor.remove(key);
-        } else {
-            editor.putString(key, value);
-        }
-        editor.commit();
-    }
-
-    /**
-     * Get device type, e.g. "android-tablet"
-     */
-    private String _getDeviceType() {
-        return _deviceType;
+    public EndpointRequestHelper forEndpoint(String token) {
+        return new EndpointRequestHelper(this, token);
     }
 
     /**
      * Get Api Header
      */
-    private Header getApiHeader() {
+    private Header _getApiHeader() {
         return new BasicHeader("X-MsgsIo-APIKey", _apiKey);
+    }
+
+    /**
+     * Convert JSON object to name value pairs.
+     * 
+     * @param properties
+     * 
+     * @return Name value pairs.
+     */
+    protected List<NameValuePair> _getParams(JSONObject data) {
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+
+        Iterator<?> iter = data.keys();
+        while (iter.hasNext()) {
+            try {
+                String key = (String)iter.next();
+                Object value = data.get(key);
+                if (value != null) {
+                    if (value instanceof Boolean) {
+                        value = ((Boolean)value).booleanValue() ? 1 : 0;
+                    }
+
+                    params.add(new BasicNameValuePair(key, String.valueOf(value)));
+                }
+            } catch (JSONException e) {
+            }
+        }
+
+        return params;
     }
 
     /**
      * Perform a GET request with the ApiKey header.
      */
-    protected JSONObject _get(String location, boolean useSSL) throws APIException {
-        return _getAPIClient().get(location, useSSL, new Header[] { getApiHeader() });
+    protected JSONObject _get(String path, List<NameValuePair> params) throws APIException {
+        return _getAPIClient().get(path + (!params.isEmpty() ? "?" + URLEncodedUtils.format(params, "utf-8") : ""), true, new Header[] { _getApiHeader() });
     }
 
     /**
      * Perform a POST request with the ApiKey header.
      */
-    protected JSONObject _post(String location, HttpEntity entity, boolean useSSL) throws APIException {
-        return _getAPIClient().post(location, entity, useSSL, new Header[] { getApiHeader() });
+    protected JSONObject _post(String path, List<NameValuePair> params) throws APIException {
+        try {
+            return _getAPIClient().post(path, new UrlEncodedFormEntity(params, "utf-8"), true, new Header[] { _getApiHeader() });
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
     }
 
     /**
      * Perform a DELETE request with the ApiKey header.
      */
-    protected JSONObject _delete(String location, boolean useSSL) throws APIException {
-        return _getAPIClient().delete(location, useSSL, new Header[] { getApiHeader() });
+    protected JSONObject _delete(String path) throws APIException {
+        return _getAPIClient().delete(path, true, new Header[] { _getApiHeader() });
     }
 }

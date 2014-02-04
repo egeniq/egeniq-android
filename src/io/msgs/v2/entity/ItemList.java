@@ -1,61 +1,105 @@
 package io.msgs.v2.entity;
 
+import java.lang.reflect.Array;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 /**
  * ItemList enitiy.
  * 
  */
-public class ItemList<T> {
-    private int _total;
-    private int _count;
-    private T[] _items;
+public class ItemList<T extends AbstractEntity> extends AbstractEntity {
+    private Class<T> _clazz;
+
+    public ItemList(Class<T> clazz) {
+        super();
+        _clazz = clazz;
+    }
+
+    public ItemList(Class<T> clazz, JSONObject data) {
+        super(data);
+        _clazz = clazz;
+    }
 
     /**
      * Get total.
      */
-    public int getTotal() {
-        return _total;
+    public Integer getTotal() {
+        return _getInteger("total");
     }
 
     /**
      * Set total.
      */
-    public void setTotal(int total) {
-        _total = total;
+    public ItemList<T> setTotal(Integer total) {
+        _putInteger("total", total);
+        return this;
     }
 
     /**
      * Get count.
      */
-    public int getCount() {
-        return _count;
+    public Integer getCount() {
+        return _getInteger("count");
     }
 
     /**
      * Set count.
      */
-    public void setCount(int count) {
-        _count = count;
+    public ItemList<T> setCount(Integer count) {
+        _putInteger("count", count);
+        return this;
     }
 
     /**
      * Get item for index.
      */
     public T get(int index) {
-        return _items[index];
+        JSONArray rawItems = _getArray("items");
+        if (rawItems == null || index >= rawItems.length()) {
+            return null;
+        } else {
+            try {
+                return _clazz.getConstructor(JSONObject.class).newInstance(rawItems.getJSONObject(index));
+            } catch (Exception e) {
+                return null;
+            }
+        }
     }
-    
+
     /**
      * Get items.
      */
     public T[] getItems() {
-        return _items;
+        try {
+            JSONArray rawItems = _getArray("items");
+            if (rawItems == null) {
+                return null;
+            }
+
+            @SuppressWarnings("unchecked")
+            T[] result = (T[])Array.newInstance(_clazz, rawItems.length());
+            for (int i = 0; i < rawItems.length(); i++) {
+                result[i] = _clazz.getConstructor(JSONObject.class).newInstance(rawItems.getJSONObject(i));
+            }
+
+            return result;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
      * Set items.
      */
-    public void setItems(T[] items) {
-        _items = items;
-    }
+    public ItemList<T> setItems(T[] items) {
+        JSONArray rawItems = new JSONArray();
+        for (int i = 0; i < items.length; i++) {
+            rawItems.put(items[i]._data);
+        }
 
+        _putArray("items", rawItems);
+        return this;
+    }
 }
