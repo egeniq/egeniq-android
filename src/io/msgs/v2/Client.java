@@ -179,7 +179,7 @@ public class Client {
      * Perform a GET request with the ApiKey header.
      */
     protected JSONObject _get(String path, List<NameValuePair> params) throws APIException {
-        return _getAPIClient().get(path + (!params.isEmpty() ? "?" + URLEncodedUtils.format(params, "utf-8") : ""), true, new Header[] { _getApiHeader() });
+        return _getAPIClient().get(path + (params != null && !params.isEmpty() ? "?" + URLEncodedUtils.format(params, "utf-8") : ""), true, new Header[] { _getApiHeader() });
     }
 
     /**
@@ -187,7 +187,7 @@ public class Client {
      */
     protected JSONObject _post(String path, List<NameValuePair> params) throws APIException {
         try {
-            return _getAPIClient().post(path, new UrlEncodedFormEntity(params, "utf-8"), true, new Header[] { _getApiHeader() });
+            return _getAPIClient().post(path, params == null ? null : new UrlEncodedFormEntity(params, "utf-8"), true, new Header[] { _getApiHeader() });
         } catch (UnsupportedEncodingException e) {
             return null;
         }
