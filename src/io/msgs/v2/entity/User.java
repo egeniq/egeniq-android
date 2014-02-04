@@ -23,6 +23,21 @@ public class User extends AbstractEntity {
     }
 
     /**
+     * Get token.
+     */
+    public String getToken() {
+        return _getString("token");
+    }
+
+    /**
+     * Sets the token.
+     */
+    public User setToken(String token) {
+        _putString("token", token);
+        return this;
+    }
+
+    /**
      * Get external user identifier.
      */
     public String getExternalUserId() {
@@ -32,7 +47,8 @@ public class User extends AbstractEntity {
     /**
      * Sets the external user identifier.
      */
-    public void setExternalUserId(String externalUserId) {
+    public User setExternalUserId(String externalUserId) {
         _putString("externalUserId", externalUserId);
+        return this;
     }
 }

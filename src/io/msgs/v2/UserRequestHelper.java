@@ -40,7 +40,7 @@ public class UserRequestHelper extends RequestHelper {
      */
     public Endpoint registerEndpoint(JSONObject data) throws APIException {
         try {
-            JSONObject object = _post("endpoints", _client._getParams(data));
+            JSONObject object = _post("endpoints", _getParams(data));
             return new Endpoint(object);
         } catch (Exception e) {
             if (DEBUG) {
@@ -94,6 +94,6 @@ public class UserRequestHelper extends RequestHelper {
      * @param endpointToken
      */
     public EndpointRequestHelper forEndpoint(String endpointToken) {
-        return new EndpointRequestHelper(_client, endpointToken, _basePath);
+        return new EndpointRequestHelper(this, endpointToken);
     }
 }

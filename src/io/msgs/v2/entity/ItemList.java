@@ -32,8 +32,9 @@ public class ItemList<T extends AbstractEntity> extends AbstractEntity {
     /**
      * Set total.
      */
-    public void setTotal(Integer total) {
+    public ItemList<T> setTotal(Integer total) {
         _putInteger("total", total);
+        return this;
     }
 
     /**
@@ -46,8 +47,9 @@ public class ItemList<T extends AbstractEntity> extends AbstractEntity {
     /**
      * Set count.
      */
-    public void setCount(Integer count) {
+    public ItemList<T> setCount(Integer count) {
         _putInteger("count", count);
+        return this;
     }
 
     /**
@@ -91,12 +93,13 @@ public class ItemList<T extends AbstractEntity> extends AbstractEntity {
     /**
      * Set items.
      */
-    public void setItems(T[] items) {
+    public ItemList<T> setItems(T[] items) {
         JSONArray rawItems = new JSONArray();
         for (int i = 0; i < items.length; i++) {
             rawItems.put(items[i]._data);
         }
 
         _putArray("items", rawItems);
+        return this;
     }
 }

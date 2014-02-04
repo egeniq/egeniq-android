@@ -31,8 +31,9 @@ public class Channel extends AbstractEntity {
     /**
      * Set code.
      */
-    public void setCode(String code) {
+    public Channel setCode(String code) {
         _putString("code", code);
+        return this;
     }
 
     /**
@@ -45,8 +46,9 @@ public class Channel extends AbstractEntity {
     /**
      * Set name.
      */
-    public void setName(String name) {
+    public Channel setName(String name) {
         _putString("name", name);
+        return this;
     }
 
     /**
@@ -59,8 +61,9 @@ public class Channel extends AbstractEntity {
     /**
      * Set tags.
      */
-    public void setTags(String[] tags) {
+    public Channel setTags(String[] tags) {
         _putStringArray("tags", tags);
+        return this;
     }
 
     /**
@@ -73,7 +76,8 @@ public class Channel extends AbstractEntity {
     /**
      * Set data.
      */
-    public void setData(JSONObject data) {
+    public Channel setData(JSONObject data) {
         _putObject("data", data);
+        return this;
     }
 }

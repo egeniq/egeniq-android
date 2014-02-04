@@ -23,8 +23,8 @@ public abstract class RequestHelper {
     private final static String TAG = RequestHelper.class.getSimpleName();
     private final static boolean DEBUG = BuildConfig.DEBUG;
 
-    protected Client _client;
-    protected String _basePath;
+    private Client _client;
+    private String _basePath;
 
     public enum Sort {
         // @formatter:off
@@ -59,6 +59,17 @@ public abstract class RequestHelper {
         _client = client;
         _basePath = basePath;
     }
+    
+    /**
+     * Constructor.
+     * 
+     * @param client
+     * @param basePath
+     */
+    public RequestHelper(RequestHelper parent, String basePath) {
+        _client = parent._client;
+        _basePath = parent._basePath + "/" + basePath;
+    }    
 
     /**
      * Get subscription.
@@ -107,7 +118,7 @@ public abstract class RequestHelper {
                 params.add(new BasicNameValuePair("sort", TextUtils.join(",", sort)));
             }
 
-            JSONObject object = _client._get("subscriptions", params);
+            JSONObject object = _get("subscriptions", params);
             
             return new ItemList<Subscription>(Subscription.class, object);
         } catch (Exception e) {
@@ -133,7 +144,7 @@ public abstract class RequestHelper {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("channelCode", channelCode));
 
-            JSONObject object = _client._post("subscriptions", params);
+            JSONObject object = _post("subscriptions", params);
             return new Subscription(object);
         } catch (Exception e) {
             if (DEBUG) {
@@ -155,7 +166,7 @@ public abstract class RequestHelper {
      */
     public void unsubscribe(String channelCode) throws APIException {
         try {
-            _client._delete("subscriptions/" + channelCode);
+            _delete("subscriptions/" + channelCode);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error unsubscribing user or endpoint", e);
@@ -173,20 +184,31 @@ public abstract class RequestHelper {
      * Perform a GET request with the ApiKey header.
      */
     protected JSONObject _get(String path, List<NameValuePair> params) throws APIException {
-        return _client._get(_basePath + "/" + path, params);
+        return _client._get(path == null ? _basePath : _basePath + "/" + path, params);
     }
 
     /**
      * Perform a POST request with the ApiKey header.
      */
     protected JSONObject _post(String path, List<NameValuePair> params) throws APIException {
-        return _client._post(_basePath + "/" + path, params);
+        return _client._post(path == null ? _basePath : _basePath + "/" + path, params);
     }
 
     /**
      * Perform a DELETE request with the ApiKey header.
      */
     protected JSONObject _delete(String path) throws APIException {
-        return _client._delete(_basePath + "/" + path);
+        return _client._delete(path == null ? _basePath : _basePath + "/" + path);
+    }    
+    
+    /**
+     * Convert JSON object to name value pairs.
+     * 
+     * @param properties
+     * 
+     * @return Name value pairs.
+     */
+    protected List<NameValuePair> _getParams(JSONObject data) {
+        return _client._getParams(data);
     }    
 }

@@ -11,8 +11,6 @@ public class Endpoint extends AbstractEntity {
      */
     public Endpoint() {
         super();
-        setEndpointSubscriptionsActive(true);
-        setUserSubscriptionsActive(true);
     }
 
     /**
@@ -34,8 +32,9 @@ public class Endpoint extends AbstractEntity {
     /**
      * Set Token.
      */
-    public void setToken(String token) {
+    public Endpoint setToken(String token) {
         _putString("token", token);
+        return this;
     }
 
     /**
@@ -48,8 +47,9 @@ public class Endpoint extends AbstractEntity {
     /**
      * Set Type.
      */
-    public void setType(String type) {
+    public Endpoint setType(String type) {
         _putString("type", type);
+        return this;
     }
 
     /**
@@ -62,8 +62,9 @@ public class Endpoint extends AbstractEntity {
     /**
      * Set Address.
      */
-    public void setAddress(String address) {
+    public Endpoint setAddress(String address) {
         _putString("address", address);
+        return this;
     }
 
     /**
@@ -76,8 +77,9 @@ public class Endpoint extends AbstractEntity {
     /**
      * Set Name.
      */
-    public void setName(String name) {
+    public Endpoint setName(String name) {
         _putString("name", name);
+        return this;
     }
 
     /**
@@ -90,8 +92,9 @@ public class Endpoint extends AbstractEntity {
     /**
      * Get EndpointSubscriptionsActive.
      */
-    public void setEndpointSubscriptionsActive(Boolean endpointSubscriptionsActive) {
+    public Endpoint setEndpointSubscriptionsActive(Boolean endpointSubscriptionsActive) {
         _putBoolean("endpointSubscriptionsActive", endpointSubscriptionsActive);
+        return this;
     }
 
     /**
@@ -104,8 +107,9 @@ public class Endpoint extends AbstractEntity {
     /**
      * Set UserSubscriptionsActive.
      */
-    public void setUserSubscriptionsActive(Boolean userSubscriptionsActive) {
+    public Endpoint setUserSubscriptionsActive(Boolean userSubscriptionsActive) {
         _putBoolean("userSubscriptionsActive", userSubscriptionsActive);
+        return this;
     }
 
     /**
@@ -118,7 +122,8 @@ public class Endpoint extends AbstractEntity {
     /**
      * Set Data.
      */
-    public void setData(JSONObject data) {
+    public Endpoint setData(JSONObject data) {
         _putObject("data", data);
+        return this;
     }
 }

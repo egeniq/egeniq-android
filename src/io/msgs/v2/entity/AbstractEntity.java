@@ -39,7 +39,7 @@ public class AbstractEntity {
      */
     protected Boolean _getBoolean(String key) {
         try {
-            if (!_data.has(key) || !_data.isNull(key)) {
+            if (!_data.has(key) || _data.isNull(key)) {
                 return null;
             } else {
                 return _data.getBoolean(key);
@@ -71,7 +71,7 @@ public class AbstractEntity {
      */
     protected Integer _getInteger(String key) {
         try {
-            if (!_data.has(key) || !_data.isNull(key)) {
+            if (!_data.has(key) || _data.isNull(key)) {
                 return null;
             } else {
                 return _data.getInt(key);
@@ -103,7 +103,7 @@ public class AbstractEntity {
      */
     protected Long _getLong(String key) {
         try {
-            if (!_data.has(key) || !_data.isNull(key)) {
+            if (!_data.has(key) || _data.isNull(key)) {
                 return null;
             } else {
                 return _data.getLong(key);
@@ -135,7 +135,7 @@ public class AbstractEntity {
      */
     protected Double _getDouble(String key) {
         try {
-            if (!_data.has(key) || !_data.isNull(key)) {
+            if (!_data.has(key) || _data.isNull(key)) {
                 return null;
             } else {
                 return _data.getDouble(key);
@@ -167,7 +167,7 @@ public class AbstractEntity {
      */
     protected String _getString(String key) {
         try {
-            if (!_data.has(key) || !_data.isNull(key)) {
+            if (!_data.has(key) || _data.isNull(key)) {
                 return null;
             } else {
                 return _data.getString(key);
@@ -199,7 +199,7 @@ public class AbstractEntity {
      */
     protected JSONObject _getObject(String key) {
         try {
-            if (!_data.has(key) || !_data.isNull(key)) {
+            if (!_data.has(key) || _data.isNull(key)) {
                 return null;
             } else {
                 return _data.getJSONObject(key);
@@ -231,7 +231,7 @@ public class AbstractEntity {
      */
     protected JSONArray _getArray(String key) {
         try {
-            if (!_data.has(key) || !_data.isNull(key)) {
+            if (!_data.has(key) || _data.isNull(key)) {
                 return null;
             } else {
                 return _data.getJSONArray(key);
@@ -263,7 +263,7 @@ public class AbstractEntity {
      */
     protected String[] _getStringArray(String key) {
         try {
-            if (!_data.has(key) || !_data.isNull(key)) {
+            if (!_data.has(key) || _data.isNull(key)) {
                 return null;
             } else {
                 JSONArray items = _data.getJSONArray(key);
@@ -319,7 +319,7 @@ public class AbstractEntity {
      * 
      * @return Data.
      */
-    public JSONObject toJSON(String[] keys) {
+    public JSONObject toJSON(String... keys) {
         try {
             JSONObject result = new JSONObject();
             for (String key : keys) {

@@ -36,7 +36,8 @@ public class Subscription extends AbstractEntity {
     /**
      * Set channel.
      */
-    public void setChannel(Channel channel) {
+    public Subscription setChannel(Channel channel) {
         _putObject("channel", channel != null ? channel._data : null);
+        return this;
     }
 }

@@ -21,14 +21,14 @@ public class EndpointRequestHelper extends RequestHelper {
      * Constructor
      */
     public EndpointRequestHelper(Client client, String endpointToken) {
-        super(client, "endpoints" + endpointToken);
+        super(client, "endpoints/" + endpointToken);
     }
 
     /**
      * Constructor
      */
-    public EndpointRequestHelper(Client client, String endpointToken, String basePath) {
-        super(client, basePath + "/endpoints/" + endpointToken);
+    public EndpointRequestHelper(RequestHelper parent, String endpointToken) {
+        super(parent, "endpoints/" + endpointToken);
     }
 
     /**
@@ -56,7 +56,7 @@ public class EndpointRequestHelper extends RequestHelper {
      */
     public Endpoint update(JSONObject data) throws APIException {
         try {
-            JSONObject object = _post(null, _client._getParams(data));
+            JSONObject object = _post(null, _getParams(data));
             return new Endpoint(object);
         } catch (Exception e) {
             if (DEBUG) {
@@ -76,7 +76,7 @@ public class EndpointRequestHelper extends RequestHelper {
      */
     public void delete() throws APIException {
         try {
-            _client._delete(null);
+            _delete(null);
         } catch (Exception e) {
             if (DEBUG) {
                 Log.e(TAG, "Error deleting endpoint", e);

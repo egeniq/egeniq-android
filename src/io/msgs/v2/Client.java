@@ -19,8 +19,6 @@ import ch.boye.httpclientandroidlib.client.utils.URLEncodedUtils;
 import ch.boye.httpclientandroidlib.message.BasicHeader;
 import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
 
-import com.egeniq.BuildConfig;
-import com.egeniq.utils.api.APIClient;
 import com.egeniq.utils.api.APIException;
 
 /**
@@ -31,12 +29,20 @@ import com.egeniq.utils.api.APIException;
  */
 public class Client {
     private final static String TAG = Client.class.getSimpleName();
-    private final static boolean DEBUG = BuildConfig.DEBUG;
+    private final static boolean DEBUG = true; // BuildConfig.DEBUG;
 
     private final String _baseURL;
     private final String _apiKey;
 
     private APIClient _apiClient;
+
+    private static class APIClient extends com.egeniq.utils.api.APIClient {
+        public APIClient(String baseURL) {
+            super(baseURL);
+            _setLoggingEnabled(DEBUG);
+            _setLoggingTag(getClass().getName());
+        }
+    }
 
     /**
      * Constructor.
@@ -74,7 +80,7 @@ public class Client {
      */
     public Endpoint registerEndpoint(JSONObject data) throws APIException {
         try {
-            JSONObject object = _post("/endpoints", _getParams(data));
+            JSONObject object = _post("endpoints", _getParams(data));
             return new Endpoint(object);
         } catch (Exception e) {
             if (DEBUG) {
@@ -100,7 +106,7 @@ public class Client {
      */
     public User registerUser(JSONObject data) throws APIException {
         try {
-            JSONObject object = _post("/users", _getParams(data));
+            JSONObject object = _post("users", _getParams(data));
             return new User(object);
         } catch (Exception e) {
             if (DEBUG) {
@@ -141,13 +147,11 @@ public class Client {
     }
 
     /**
-     * Convert properties to HTTP entity.
+     * Convert JSON object to name value pairs.
      * 
      * @param properties
      * 
-     * @return HTTP entity.
-     * 
-     * @throws UnsupportedEncodingException
+     * @return Name value pairs.
      */
     protected List<NameValuePair> _getParams(JSONObject data) {
         List<NameValuePair> params = new ArrayList<NameValuePair>();
