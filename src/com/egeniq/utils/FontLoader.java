@@ -19,7 +19,7 @@ import android.widget.TextView;
  * - assets/fonts/
  * - assets/shared/fonts/
  * 
- * @author …zcan Kaymak
+ * @author Ã–zcan Kaymak
  */
 public class FontLoader {
     public static final String TAG = FontLoader.class.getName();

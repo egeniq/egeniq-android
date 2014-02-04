@@ -10,7 +10,7 @@ import com.egeniq.utils.FontLoader;
 /**
  * Custom CheckedTextView to enable setting custom fonts
  * 
- * @author …zcan Kaymak
+ * @author Ã–zcan Kaymak
  */
 public class CheckedTextView extends android.widget.CheckedTextView {
 
