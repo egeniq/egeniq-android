@@ -5,6 +5,7 @@ import io.msgs.v2.entity.Subscription;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.json.JSONObject;
 
@@ -112,7 +113,7 @@ public abstract class RequestHelper {
      * @param limit        Optional. Pass <b>null</b> to use default value.
      * @param offset       Optional. Pass <b>null</b> to use default value.
      */
-    public ItemList<Subscription> fetchSubscriptionsForChannels(String[] channelCodes, Sort sort, Integer limit, Integer offset) throws APIException {
+    public ItemList<Subscription> fetchSubscriptionsForChannels(Set<String> channelCodes, Sort sort, Integer limit, Integer offset) throws APIException {
         return _fetchSubscriptions(channelCodes, null, sort, limit, offset);        
     }
     
@@ -124,7 +125,7 @@ public abstract class RequestHelper {
      * @param limit     Optional. Pass <b>null</b> to use default value.
      * @param offset    Optional. Pass <b>null</b> to use default value.
      */
-    public ItemList<Subscription> fetchSubscriptionsForTags(String[] tags, Sort sort, Integer limit, Integer offset) throws APIException {
+    public ItemList<Subscription> fetchSubscriptionsForTags(Set<String> tags, Sort sort, Integer limit, Integer offset) throws APIException {
         return _fetchSubscriptions(null, tags, sort, limit, offset);
     }
     
@@ -137,7 +138,7 @@ public abstract class RequestHelper {
      * @param limit       Optional. Pass <b>null</b> to use default value.
      * @param offset      Optional. Pass <b>null</b> to use default value.
      */
-    protected ItemList<Subscription> _fetchSubscriptions(String[] channelCodes, String[] tags, Sort sort, Integer limit, Integer offset) throws APIException {
+    protected ItemList<Subscription> _fetchSubscriptions(Set<String> channelCodes, Set<String> tags, Sort sort, Integer limit, Integer offset) throws APIException {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
 
