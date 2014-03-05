@@ -5,6 +5,7 @@ import io.msgs.v2.entity.Subscription;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.json.JSONObject;
 
@@ -94,17 +95,60 @@ public abstract class RequestHelper {
     }    
     
     /**
-     * Get Subscriptions.
+     * Fetch subscriptions.
+     * 
+     * @param sort   Optional. Pass <b>null</b> to use default value.
+     * @param limit  Optional. Pass <b>null</b> to use default value.
+     * @param offset Optional. Pass <b>null</b> to use default value.
+     */
+    public ItemList<Subscription> fetchSubscriptions(Sort sort, Integer limit, Integer offset) throws APIException {
+        return _fetchSubscriptions(null, null, sort, limit, offset);
+    }
+    
+    /**
+     * Fetch subscriptions.
+     * 
+     * @param channelCodes Array of channel codes.
+     * @param sort         Optional. Pass <b>null</b> to use default value.
+     * @param limit        Optional. Pass <b>null</b> to use default value.
+     * @param offset       Optional. Pass <b>null</b> to use default value.
+     */
+    public ItemList<Subscription> fetchSubscriptionsForChannels(Set<String> channelCodes, Sort sort, Integer limit, Integer offset) throws APIException {
+        return _fetchSubscriptions(channelCodes, null, sort, limit, offset);        
+    }
+    
+    /**
+     * Fetch subscriptions.
      * 
      * @param tags      Array of tags.
      * @param sort      Optional. Pass <b>null</b> to use default value.
      * @param limit     Optional. Pass <b>null</b> to use default value.
      * @param offset    Optional. Pass <b>null</b> to use default value.
      */
-    public ItemList<Subscription> fetchSubscriptions(String[] tags, Sort[] sort, Integer limit, Integer offset) throws APIException {
+    public ItemList<Subscription> fetchSubscriptionsForTags(Set<String> tags, Sort sort, Integer limit, Integer offset) throws APIException {
+        return _fetchSubscriptions(null, tags, sort, limit, offset);
+    }
+    
+    /**
+     * Fetch subscriptions.
+     * 
+     * @param channelCode Array of channel codes.
+     * @param tags        Array of tags.
+     * @param sort        Optional. Pass <b>null</b> to use default value.
+     * @param limit       Optional. Pass <b>null</b> to use default value.
+     * @param offset      Optional. Pass <b>null</b> to use default value.
+     */
+    protected ItemList<Subscription> _fetchSubscriptions(Set<String> channelCodes, Set<String> tags, Sort sort, Integer limit, Integer offset) throws APIException {
         try {
             List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("tags", TextUtils.join(",", tags)));
+
+            if (channelCodes != null) {
+                params.add(new BasicNameValuePair("channelCodes", TextUtils.join(",", channelCodes)));
+            }
+            
+            if (tags != null) {
+                params.add(new BasicNameValuePair("tags", TextUtils.join(",", tags)));
+            }
             
             if (limit != null) {
                 params.add(new BasicNameValuePair("limit", String.valueOf(limit)));
@@ -115,11 +159,10 @@ public abstract class RequestHelper {
             }
             
             if (sort != null) {
-                params.add(new BasicNameValuePair("sort", TextUtils.join(",", sort)));
+                params.add(new BasicNameValuePair("sort", sort.toString()));
             }
 
             JSONObject object = _get("subscriptions", params);
-            
             return new ItemList<Subscription>(Subscription.class, object);
         } catch (Exception e) {
             if (DEBUG) {
