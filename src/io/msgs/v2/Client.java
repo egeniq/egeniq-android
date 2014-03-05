@@ -19,6 +19,7 @@ import ch.boye.httpclientandroidlib.client.utils.URLEncodedUtils;
 import ch.boye.httpclientandroidlib.message.BasicHeader;
 import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
 
+import com.egeniq.BuildConfig;
 import com.egeniq.utils.api.APIException;
 
 /**
@@ -29,7 +30,7 @@ import com.egeniq.utils.api.APIException;
  */
 public class Client {
     private final static String TAG = Client.class.getSimpleName();
-    private final static boolean DEBUG = true; // BuildConfig.DEBUG;
+    private final static boolean DEBUG = BuildConfig.DEBUG;
 
     private final String _baseURL;
     private final String _apiKey;
