@@ -1,4 +1,4 @@
-package com.egeniq.utils;
+package com.egeniq.utils.loader;
 
 import java.lang.ref.SoftReference;
 import java.util.Hashtable;
@@ -20,6 +20,9 @@ import android.widget.TextView;
  * - assets/shared/fonts/
  * 
  * @author Özcan Kaymak
+ *
+ * TODO: This class has a high dependency with View. TypefaceLoader is an independent alternative
+ * TODO: Both classes now keep their own cache. This class should depend on TypefaceLoader for cachingCustomTypefaceSpanCustomTypefaceSpan.
  */
 public class FontLoader {
     public static final String TAG = FontLoader.class.getName();
