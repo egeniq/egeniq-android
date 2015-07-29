@@ -22,14 +22,14 @@ public class CustomTypefaceSpan extends MetricAffectingSpan {
         _apply(drawState);
     }
 
-    /**
-     * Updates the paint object with font styles and sets the typeface
-     */
     @Override
     public void updateMeasureState(final TextPaint paint) {
         _apply(paint);
     }
 
+    /**
+     * Updates the paint object with font styles and sets the typeface
+     */
     private void _apply(final Paint paint) {
         final Typeface oldTypeface = paint.getTypeface();
         final int oldStyle = (oldTypeface != null) ? oldTypeface.getStyle() : 0;
