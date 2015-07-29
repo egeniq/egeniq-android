@@ -14,15 +14,15 @@ import android.widget.TextView;
 
 /**
  * Loader to load custom fonts into views. The fonts are cached after initial loading, to ensure it is loaded only once in memory.
- * 
+ *
  * Fonts are searched at the following paths:
  * - assets/fonts/
  * - assets/shared/fonts/
- * 
+ *
  * @author Özcan Kaymak
  *
- * TODO: This class has a high dependency with View. TypefaceLoader is an independent alternative
- * TODO: Both classes now keep their own cache. This class should depend on TypefaceLoader for cachingCustomTypefaceSpanCustomTypefaceSpan.
+ *         TODO: This class has a high dependency with View. TypefaceLoader is an independent alternative.
+ *         TODO: Both classes now keep their own cache. This class should depend on TypefaceLoader for caching.
  */
 public class FontLoader {
     public static final String TAG = FontLoader.class.getName();
@@ -35,7 +35,7 @@ public class FontLoader {
 
     /**
      * Set a custom font for this view. Font is defined in layout-xml (or style).
-     * 
+     *
      * @param view         The view
      * @param context      The context
      * @param attrs        The default attributeset
@@ -52,12 +52,11 @@ public class FontLoader {
 
     /**
      * Set the Font.
-     * 
+     *
      * @param view    The view
      * @param context The context
      * @param font    The font
      * @param style   The style
-     * 
      * @return true if font is set, else false
      */
     private static boolean setFont(View view, Context context, String font, int style) {
@@ -86,10 +85,10 @@ public class FontLoader {
             if (DEBUG) {
                 Log.e(TAG, "Could not get typeface: " + name + ". Retrying with regular style.");
             }
-            
+
             typeface = getFont(context, String.format("%s-Regular.ttf", font));
         }
-        
+
         if (typeface == null) {
             switch (style) {
                 case Typeface.BOLD:
@@ -106,21 +105,21 @@ public class FontLoader {
                     break;
             }
         }
-        
+
         typeface = getFont(context, name);
         if (typeface == null) {
             if (DEBUG) {
                 Log.e(TAG, "Could not get typeface: " + name + ". Retrying with regular style.");
             }
-            
+
             typeface = getFont(context, String.format("%s-Regular.otf", font));
         }
-        
+
         if (typeface == null) {
             if (DEBUG) {
                 Log.e(TAG, "Could not get typeface: " + name + ". Retrying without applying style and presuming a ttf font.");
             }
-            
+
             typeface = getFont(context, String.format("%s.ttf", font));
         }
 
@@ -128,18 +127,18 @@ public class FontLoader {
             if (DEBUG) {
                 Log.e(TAG, "Could not get typeface: " + name + ". Retrying without applying style and presuming a otf font.");
             }
-            
+
             typeface = getFont(context, String.format("%s.otf", font));
         }
-        
+
         if (typeface == null) {
             if (DEBUG) {
                 Log.e(TAG, "Could not get typeface: " + font);
             }
-                
+
             return false;
         }
-        
+
         if (typeface != null && view instanceof TextView) { // covers TextView and Button
             ((TextView)view).setTypeface(typeface);
         } else if (DEBUG) {
@@ -151,10 +150,9 @@ public class FontLoader {
 
     /**
      * Get font from assets or fontcache
-     * 
+     *
      * @param context The context
      * @param name    The full name for the font
-     * 
      * @return Typeface
      */
     public static Typeface getFont(Context context, String name) {
@@ -165,9 +163,9 @@ public class FontLoader {
                     return ref.get();
                 }
             }
-            
+
             Typeface typeface = null;
-            
+
             try {
                 typeface = Typeface.createFromAsset(context.getAssets(), "fonts/" + name);
             } catch (Exception e1) {
@@ -175,8 +173,8 @@ public class FontLoader {
                     typeface = Typeface.createFromAsset(context.getAssets(), "shared/fonts/" + name);
                 } catch (Exception e2) {
                 }
-            } 
-            
+            }
+
             if (typeface != null) {
                 _fontCache.put(name, new SoftReference<Typeface>(typeface));
             }
