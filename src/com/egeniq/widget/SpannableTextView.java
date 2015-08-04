@@ -9,7 +9,7 @@ import android.text.style.MetricAffectingSpan;
 import android.text.style.TextAppearanceSpan;
 import android.util.AttributeSet;
 
-import com.egeniq.utils.loader.TypefaceLoader;
+import com.egeniq.utils.loader.FontLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,43 +20,21 @@ import java.util.List;
  */
 public class SpannableTextView extends TextView {
 
-    /**
-     * Data class for storing Markup data for each span applied to this TextView.
-     */
-    private class _MarkupData {
-        private final String _text;
-        private final MetricAffectingSpan[] _spanArray;
-
-        public _MarkupData(String text, MetricAffectingSpan... spanArray) {
-            this._text = text;
-            this._spanArray = spanArray;
-        }
-
-        public MetricAffectingSpan[] getSpans() {
-            return this._spanArray;
-        }
-
-        public String getText() {
-            return this._text;
-        }
-    }
-
-    private List<_MarkupData> _markupList;
+    private List<MarkupData> _markupList;
     private String _markupText;
-
     public SpannableTextView(Context context) {
         super(context);
-        this._initialize();
+        _initialize();
     }
 
     public SpannableTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this._initialize();
+        _initialize();
     }
 
     private void _initialize() {
-        this._markupList = new ArrayList<_MarkupData>();
-        this._markupText = "";
+        _markupList = new ArrayList<MarkupData>();
+        _markupText = "";
     }
 
     /**
@@ -71,18 +49,18 @@ public class SpannableTextView extends TextView {
         int[] attrs = {com.egeniq.R.attr.font};
         TypedArray styleArray = getContext().obtainStyledAttributes(style, attrs);
         String customFontName = styleArray.getString(0);
-        Typeface typeface = TypefaceLoader.get(getContext(), customFontName);
+        Typeface typeface = FontLoader.getFont(getContext(), customFontName);
 
         if (typeface != null) {
             CustomTypefaceSpan customTypefaceSpan = new CustomTypefaceSpan(typeface);
             TextAppearanceSpan textAppearanceSpan = new TextAppearanceSpan(getContext(), style);
-            this._markupList.add(new _MarkupData(text, textAppearanceSpan, customTypefaceSpan));
+            _markupList.add(new MarkupData(text, textAppearanceSpan, customTypefaceSpan));
         } else {
             TextAppearanceSpan textAppearanceSpan = new TextAppearanceSpan(getContext(), style);
-            this._markupList.add(new _MarkupData(text, textAppearanceSpan));
+            _markupList.add(new MarkupData(text, textAppearanceSpan));
         }
 
-        this._markupText += text;
+        _markupText += text;
     }
 
     /**
@@ -93,7 +71,7 @@ public class SpannableTextView extends TextView {
         SpannableString text = new SpannableString(this._markupText);
 
         int start = 0, end = 0;
-        for (_MarkupData markupData : this._markupList) {
+        for (MarkupData markupData : _markupList) {
             end += markupData.getText().length();
 
             for (MetricAffectingSpan span : markupData.getSpans()) {
@@ -103,5 +81,26 @@ public class SpannableTextView extends TextView {
         }
 
         super.setText(text, BufferType.SPANNABLE);
+    }
+
+    /**
+     * Data class for storing Markup data for each span applied to this TextView.
+     */
+    private class MarkupData {
+        private final String _text;
+        private final MetricAffectingSpan[] _spanArray;
+
+        public MarkupData(String text, MetricAffectingSpan... spanArray) {
+            _text = text;
+            _spanArray = spanArray;
+        }
+
+        public MetricAffectingSpan[] getSpans() {
+            return _spanArray;
+        }
+
+        public String getText() {
+            return _text;
+        }
     }
 }
