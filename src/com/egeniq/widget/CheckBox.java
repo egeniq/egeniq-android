@@ -5,7 +5,7 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 
 import com.egeniq.R;
-import com.egeniq.utils.FontLoader;
+import com.egeniq.utils.loader.FontLoader;
 
 /**
  * Custom CheckBox to enable setting custom fonts
