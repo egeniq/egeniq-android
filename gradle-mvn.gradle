@@ -8,7 +8,7 @@ afterEvaluate { project ->
     uploadArchives {
         repositories {
             mavenDeployer {
-                repository url: "file:///" + file("${projectDir}/../mvn-repo") // Point this to your fork of the Egeniq mvn-repo
+                repository url: "file:///" + file("${projectDir}/../mvn-repo") // Point this to your existing Maven repository.
 
                 pom.project {
                     groupId     'com.egeniq'
