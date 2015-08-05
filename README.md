@@ -13,6 +13,8 @@ Todo:
 * Overview of what's in here and what you'd use it for
 * Clean up documentation (especially headers)
 
+To create a new release, run: `gradlew uploadArchives`
+
 Have fun!
 
 The Egeniq Team
