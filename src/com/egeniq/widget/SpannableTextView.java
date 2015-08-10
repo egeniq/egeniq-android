@@ -17,7 +17,13 @@ import java.util.List;
 
 /**
  * Created by josvanegmond on 7/27/15.
- * Generic class for marking up a TextView with multiple MetricAffectingSpan objects.
+ * Generic widget for marking up a TextView with multiple MetricAffectingSpan objects.
+ * This widget supports inline styling parts of the text with custom fonts and styles, as well as inserting icons.
+ * Recommend extending from this class and implement specific needs.
+ *
+ * Usage:
+ * 1) set(...) or append(...)
+ * 2) update()
  */
 public class SpannableTextView extends TextView {
 
@@ -104,7 +110,7 @@ public class SpannableTextView extends TextView {
     /**
      * Overwrites the current content of this SpannableTextView with new content. Update() must be called to update the TextView visually.
      *
-     * @param span the MetricAffectingSpan to be applied
+     * @param span the DynamicDrawableSpan to be applied
      */
     public void set(DynamicDrawableSpan span) {
         clear();
@@ -112,33 +118,41 @@ public class SpannableTextView extends TextView {
     }
 
     /**
-     * Appends a MetricAffectingSpan to the SpannableTextView. Update() must be called to update the TextView visually.
+     * Appends a DynamicDrawableSpan to the SpannableTextView. Update() must be called to update the TextView visually.
      *
      * @param span
      */
     public void append(DynamicDrawableSpan span) {
-        _markupList.add(new MarkupData(" ", span));
+        _markupList.add(new MarkupData(" ", span)); //The space will be styled with an icon
         _markupText += " ";
     }
 
     /**
      * Overwrites the current content of this SpannableTextView with new content. Update() must be called to update the TextView visually.
      *
-     * @param span the MetricAffectingSpan to be applied
+     * @param span the MetricAffectingSpan to be set
+     * @param text the characters to be spanned.
+     *             When no actual text is styled, insert the amount of characters equal to the amount of items being applied by the span.
+     *             Example:
+     *              An Image takes one character so insert one blank space: append(new ImageSpan(...), " ");
      */
-    public void set(MetricAffectingSpan span) {
+    public void set(MetricAffectingSpan span, String text) {
         clear();
-        append(span);
+        append(span, text);
     }
 
     /**
-     * Appends a MetricAffectingSpan to the SpannableTextView. Update() must be called to update the TextView visually.
+     * Generic method to append a MetricAffectingSpan to the SpannableTextView. Update() must be called to update the TextView visually.
      *
-     * @param span the MetricAffectingSpan to be set
+     * @param span the MetricAffectingSpan to be appended
+     * @param text the characters to be spanned.
+     *             When no actual text is styled, insert the amount of characters equal to the amount of items being applied by the span.
+     *             Example:
+     *              An Image takes one character so insert one blank space: append(new ImageSpan(...), " ");
      */
-    public void append(MetricAffectingSpan span) {
-        _markupList.add(new MarkupData(" ", span));
-        _markupText += " ";
+    public void append(MetricAffectingSpan span, String text) {
+        _markupList.add(new MarkupData(text, span));
+        _markupText += text;
     }
 
     /**
