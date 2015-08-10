@@ -33,10 +33,9 @@ public class InlineImageSpan extends DynamicDrawableSpan {
     public void draw(Canvas canvas, CharSequence text,
                      int start, int end, float x,
                      int top, int y, int bottom, Paint paint) {
-        Drawable b = _drawable;
         canvas.save();
 
-        int transY = bottom - b.getBounds().bottom;
+        int transY = bottom - _drawable.getBounds().bottom;
         if (mVerticalAlignment == ALIGN_BASELINE) {
             int textLength = text.length();
             for (int i = 0; i < textLength; i++) {
@@ -48,7 +47,7 @@ public class InlineImageSpan extends DynamicDrawableSpan {
         }
 
         canvas.translate(x, transY);
-        b.draw(canvas);
+        _drawable.draw(canvas);
         canvas.restore();
     }
 }
