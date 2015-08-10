@@ -1,4 +1,4 @@
-package nl.rtl.rtlz.widget;
+package com.egeniq.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
