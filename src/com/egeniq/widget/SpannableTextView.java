@@ -11,8 +11,6 @@ import android.text.style.TextAppearanceSpan;
 import android.util.AttributeSet;
 
 import com.egeniq.utils.loader.FontLoader;
-import com.egeniq.widget.CustomTypefaceSpan;
-import com.egeniq.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
