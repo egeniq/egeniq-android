@@ -136,7 +136,7 @@ public class SpannableTextView extends TextView {
     /**
      * Appends a MetricAffectingSpan to the SpannableTextView. Update() must be called to update the TextView visually.
      *
-     * @param span
+     * @param span the MetricAffectingSpan to be set
      */
     public void append(MetricAffectingSpan span) {
         _markupList.add(new MarkupData(" ", span));
