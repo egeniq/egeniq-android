@@ -92,14 +92,22 @@ public class SpannableTextView extends TextView {
 
         int[] attrs = {com.egeniq.R.attr.font};
         TypedArray styleArray = getContext().obtainStyledAttributes(style, attrs);
-        String customFontName = styleArray.getString(0);
-        Typeface typeface = FontLoader.getFont(getContext(), customFontName);
+        boolean customFontFound = false;
+        if (styleArray.length() > 0) {
+            String customFontName = styleArray.getString(0);
+            if (customFontName != null) {
+                Typeface typeface = FontLoader.getFont(getContext(), customFontName);
 
-        if (typeface != null) {
-            CustomTypefaceSpan customTypefaceSpan = new CustomTypefaceSpan(typeface);
-            TextAppearanceSpan textAppearanceSpan = new TextAppearanceSpan(getContext(), style);
-            _markupList.add(new MarkupData(text, textAppearanceSpan, customTypefaceSpan));
-        } else {
+                if (typeface != null) {
+                    CustomTypefaceSpan customTypefaceSpan = new CustomTypefaceSpan(typeface);
+                    TextAppearanceSpan textAppearanceSpan = new TextAppearanceSpan(getContext(), style);
+                    _markupList.add(new MarkupData(text, textAppearanceSpan, customTypefaceSpan));
+                    customFontFound = true;
+                }
+            }
+        }
+
+        if (customFontFound == false) {
             TextAppearanceSpan textAppearanceSpan = new TextAppearanceSpan(getContext(), style);
             _markupList.add(new MarkupData(text, textAppearanceSpan));
         }
@@ -112,46 +120,47 @@ public class SpannableTextView extends TextView {
      *
      * @param span the DynamicDrawableSpan to be applied
      */
-    public void set(DynamicDrawableSpan span) {
+    public void set(int style, DynamicDrawableSpan span) {
         clear();
-        append(span);
+        append(style, span);
     }
 
     /**
      * Appends a DynamicDrawableSpan to the SpannableTextView. Update() must be called to update the TextView visually.
      *
-     * @param span
+     * @param span the DynamicDrawableSpan to be applied
      */
-    public void append(DynamicDrawableSpan span) {
-        _markupList.add(new MarkupData(" ", span)); //The space will be styled with an icon
+    public void append(int style, DynamicDrawableSpan span) {
+        TextAppearanceSpan textAppearanceSpan = new TextAppearanceSpan(getContext(), style);
+        _markupList.add(new MarkupData(" ", textAppearanceSpan, span)); //The space will be styled with an icon
         _markupText += " ";
     }
 
     /**
      * Overwrites the current content of this SpannableTextView with new content. Update() must be called to update the TextView visually.
      *
-     * @param span the MetricAffectingSpan to be set
-     * @param text the characters to be spanned.
-     *             When no actual text is styled, insert the amount of characters equal to the amount of items being applied by the span.
-     *             Example:
+     * @param spans the MetricAffectingSpan list to be set
+     * @param text  the characters to be spanned.
+     *              When no actual text is styled, insert the amount of characters equal to the amount of items being applied by the span.
+     *              Example:
      *              An Image takes one character so insert one blank space: append(new ImageSpan(...), " ");
      */
-    public void set(MetricAffectingSpan span, String text) {
+    public void set(String text, MetricAffectingSpan... spans) {
         clear();
-        append(span, text);
+        append(text, spans);
     }
 
     /**
      * Generic method to append a MetricAffectingSpan to the SpannableTextView. Update() must be called to update the TextView visually.
      *
-     * @param span the MetricAffectingSpan to be appended
-     * @param text the characters to be spanned.
-     *             When no actual text is styled, insert the amount of characters equal to the amount of items being applied by the span.
-     *             Example:
+     * @param spans the MetricAffectingSpan list to be appended
+     * @param text  the characters to be spanned.
+     *              When no actual text is styled, insert the amount of characters equal to the amount of items being applied by the span.
+     *              Example:
      *              An Image takes one character so insert one blank space: append(new ImageSpan(...), " ");
      */
-    public void append(MetricAffectingSpan span, String text) {
-        _markupList.add(new MarkupData(text, span));
+    public void append(String text, MetricAffectingSpan... spans) {
+        _markupList.add(new MarkupData(text, spans));
         _markupText += text;
     }
 
