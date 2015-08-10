@@ -29,7 +29,6 @@ public class SpannableTextView extends TextView {
 
     private List<MarkupData> _markupList;
     private String _markupText;
-    private AttributeSet _attrs;
 
     public SpannableTextView(Context context) {
         super(context);
@@ -38,7 +37,6 @@ public class SpannableTextView extends TextView {
 
     public SpannableTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        _attrs = attrs;
         clear();
     }
 
