@@ -3,7 +3,6 @@ package com.egeniq.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
-import android.support.annotation.StyleRes;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.DynamicDrawableSpan;
