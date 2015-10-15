@@ -53,6 +53,10 @@ public class TextView extends android.widget.TextView implements IFormattableTex
         _init();
     }
 
+    private void _init() {
+        _originalText = getText();
+    }
+
     /**
      * Get the style from the overridden method
      */
@@ -67,12 +71,14 @@ public class TextView extends android.widget.TextView implements IFormattableTex
         return _originalText;
     }
 
-    private void _init() {
-        _originalText = getText();
+    @Override
+    public void formatText(Object... format) {
+        setText((_originalText != null) ? String.format(_originalText.toString(), format) : "");
     }
 
     @Override
-    public void formatText(Object... format) {
-        setText(String.format(getOriginalText().toString(), format));
+    public void formatText(CharSequence text, Object... format) {
+        _originalText = text;
+        formatText(format);
     }
 }

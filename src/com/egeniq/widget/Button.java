@@ -73,6 +73,12 @@ public class Button extends android.widget.Button implements IFormattableTextVie
 
     @Override
     public void formatText(Object... format) {
-        setText(String.format(getOriginalText().toString(), format));
+        setText((_originalText != null) ? String.format(_originalText.toString(), format) : "");
+    }
+
+    @Override
+    public void formatText(CharSequence text, Object... format) {
+        _originalText = text;
+        formatText(format);
     }
 }
