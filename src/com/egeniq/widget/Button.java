@@ -9,12 +9,13 @@ import com.egeniq.utils.loader.FontLoader;
 
 /**
  * Custom Button to enable setting custom fonts
- * 
+ *
  * @author Özcan Kaymak
  */
-public class Button extends android.widget.Button {
+public class Button extends android.widget.Button implements IFormattableTextView {
 
     private int _style;
+    private CharSequence _originalText;
 
     /**
      * Default constructor
@@ -24,6 +25,8 @@ public class Button extends android.widget.Button {
         if (isInEditMode()) {
             return;
         }
+
+        _init();
     }
 
     /**
@@ -34,6 +37,8 @@ public class Button extends android.widget.Button {
         if (!isInEditMode()) {
             FontLoader.setCustomFont(this, context, attrs, R.styleable.TextView, R.styleable.TextView_font, _style);
         }
+
+        _init();
     }
 
     /**
@@ -44,6 +49,12 @@ public class Button extends android.widget.Button {
         if (!isInEditMode()) {
             FontLoader.setCustomFont(this, context, attrs, R.styleable.TextView, R.styleable.TextView_font, _style);
         }
+
+        _init();
+    }
+
+    private void _init() {
+        _originalText = getText();
     }
 
     /**
@@ -53,5 +64,15 @@ public class Button extends android.widget.Button {
     public void setTypeface(Typeface tf, int style) {
         super.setTypeface(tf, style);
         _style = style;
+    }
+
+    @Override
+    public CharSequence getOriginalText() {
+        return _originalText;
+    }
+
+    @Override
+    public void formatText(Object... format) {
+        setText(String.format(getOriginalText().toString(), format));
     }
 }

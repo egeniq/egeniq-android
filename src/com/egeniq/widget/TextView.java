@@ -9,12 +9,13 @@ import com.egeniq.utils.loader.FontLoader;
 
 /**
  * Custom TextView to enable setting custom fonts
- * 
+ *
  * @author Özcan Kaymak
  */
-public class TextView extends android.widget.TextView {
+public class TextView extends android.widget.TextView implements IFormattableTextView {
 
     private int _style;
+    private CharSequence _originalText;
 
     /**
      * Default constructor
@@ -24,6 +25,8 @@ public class TextView extends android.widget.TextView {
         if (isInEditMode()) {
             return;
         }
+
+        _init();
     }
 
     /**
@@ -34,6 +37,8 @@ public class TextView extends android.widget.TextView {
         if (!isInEditMode()) {
             FontLoader.setCustomFont(this, context, attrs, R.styleable.TextView, R.styleable.TextView_font, _style);
         }
+
+        _init();
     }
 
     /**
@@ -44,6 +49,8 @@ public class TextView extends android.widget.TextView {
         if (!isInEditMode()) {
             FontLoader.setCustomFont(this, context, attrs, R.styleable.TextView, R.styleable.TextView_font, _style);
         }
+
+        _init();
     }
 
     /**
@@ -53,5 +60,19 @@ public class TextView extends android.widget.TextView {
     public void setTypeface(Typeface tf, int style) {
         super.setTypeface(tf, style);
         _style = style;
+    }
+
+    @Override
+    public CharSequence getOriginalText() {
+        return _originalText;
+    }
+
+    private void _init() {
+        _originalText = getText();
+    }
+
+    @Override
+    public void formatText(Object... format) {
+        setText(String.format(getOriginalText().toString(), format));
     }
 }

@@ -40,6 +40,11 @@ public class SpannableTextView extends TextView {
         clear();
     }
 
+    public SpannableTextView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        clear();
+    }
+
     /**
      * Clears the content of the SpannableTextView.
      */
@@ -113,6 +118,7 @@ public class SpannableTextView extends TextView {
         }
 
         _markupText += text;
+        styleArray.recycle();
     }
 
     /**
