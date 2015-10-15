@@ -69,7 +69,6 @@ public class TextView extends android.widget.TextView implements IFormattableTex
 
     private void _init() {
         _originalText = getText();
-        setText("");
     }
 
     @Override

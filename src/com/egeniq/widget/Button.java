@@ -55,7 +55,6 @@ public class Button extends android.widget.Button implements IFormattableTextVie
 
     private void _init() {
         _originalText = getText();
-        setText("");
     }
 
     /**
