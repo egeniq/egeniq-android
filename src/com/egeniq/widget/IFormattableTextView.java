@@ -19,8 +19,8 @@ public interface IFormattableTextView {
 
     /**
      * Formats the text by the specified varargs, and applies it to the TextView widget.
-     * @param originalText the text to format and apply to the TextView widget.
+     * @param text the text to format and apply to the TextView widget.
      * @param format the format to apply to the original text, as specified by String.format().
      */
-    void formatText(CharSequence originalText, Object... format);
+    void formatText(CharSequence text, Object... format);
 }

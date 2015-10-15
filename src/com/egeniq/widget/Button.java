@@ -14,7 +14,6 @@ import com.egeniq.utils.loader.FontLoader;
  */
 public class Button extends android.widget.Button implements IFormattableTextView {
 
-    private Object[] lastFormat;
     private int _style;
     private CharSequence _originalText;
 
