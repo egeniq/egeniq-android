@@ -5,6 +5,22 @@ package com.egeniq.widget;
  */
 public interface IFormattableTextView {
 
+    /**
+     * Returns the original unformatted CharSequence of the TextView widget.
+     */
     CharSequence getOriginalText();
+
+    /**
+     * Formats the text of the TextView widget by the specified varargs.
+     * For formatting rules, see String.format()
+     * @param format the format to apply to the original text, as specified by String.format().
+     */
     void formatText(Object... format);
+
+    /**
+     * Formats the text by the specified varargs, and applies it to the TextView widget.
+     * @param originalText the text to format and apply to the TextView widget.
+     * @param format the format to apply to the original text, as specified by String.format().
+     */
+    void formatText(CharSequence originalText, Object... format);
 }
