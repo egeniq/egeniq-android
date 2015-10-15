@@ -73,7 +73,7 @@ public class TextView extends android.widget.TextView implements IFormattableTex
 
     @Override
     public void formatText(Object... format) {
-        setText(String.format(_originalText.toString(), format));
+        setText((_originalText != null) ? String.format(_originalText.toString(), format) : "");
     }
 
     @Override
