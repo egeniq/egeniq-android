@@ -13,7 +13,7 @@ afterEvaluate { project ->
                 pom.project {
                     groupId     'com.egeniq'
                     artifactId  'android-library'
-                    version     '1.0.4' // Add "-SNAPSHOT" suffix to create snapshot version
+                    version     '1.0.5' // Add "-SNAPSHOT" suffix to create snapshot version
                     packaging   'aar'
                     name        'Egeniq Library'
                     description 'Egeniq Library for Android projects'

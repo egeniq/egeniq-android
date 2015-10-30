@@ -1,8 +1,10 @@
 package com.egeniq.widget;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import com.egeniq.R;
 import com.egeniq.utils.loader.FontLoader;
@@ -26,7 +28,7 @@ public class Button extends android.widget.Button implements IFormattableTextVie
             return;
         }
 
-        _init();
+        _init(context, null);
     }
 
     /**
@@ -38,7 +40,7 @@ public class Button extends android.widget.Button implements IFormattableTextVie
             FontLoader.setCustomFont(this, context, attrs, R.styleable.TextView, R.styleable.TextView_font, _style);
         }
 
-        _init();
+        _init(context, attrs);
     }
 
     /**
@@ -50,11 +52,20 @@ public class Button extends android.widget.Button implements IFormattableTextVie
             FontLoader.setCustomFont(this, context, attrs, R.styleable.TextView, R.styleable.TextView_font, _style);
         }
 
-        _init();
+        _init(context, attrs);
     }
 
-    private void _init() {
+    private void _init(Context context, AttributeSet attrs) {
         _originalText = getText();
+        Log.d("button", _originalText.toString());
+
+        //if unformatted text is available, show that text initially
+        if (context != null && attrs != null) {
+            TypedArray styledAttrs = context.obtainStyledAttributes(attrs, R.styleable.TextView);
+            String preformatText = styledAttrs.getString(R.styleable.TextView_preformat_text);
+            setText(preformatText);
+            styledAttrs.recycle();
+        }
     }
 
     /**
@@ -72,13 +83,13 @@ public class Button extends android.widget.Button implements IFormattableTextVie
     }
 
     @Override
-    public void formatText(Object... format) {
+    public void formatOriginalText(Object... format) {
         setText((_originalText != null) ? String.format(_originalText.toString(), format) : "");
     }
 
     @Override
-    public void formatText(CharSequence text, Object... format) {
+    public void formatNewText(String text, Object... format) {
         _originalText = text;
-        formatText(format);
+        formatOriginalText(format);
     }
 }

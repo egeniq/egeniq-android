@@ -11,16 +11,15 @@ public interface IFormattableTextView {
     CharSequence getOriginalText();
 
     /**
-     * Formats the text of the TextView widget by the specified varargs.
-     * For formatting rules, see String.format()
+     * Formats the text by the specified varargs, and applies it to the TextView widget.
+     * @param text the text to format and apply to the TextView widget. Can be null to use the original set text.
      * @param format the format to apply to the original text, as specified by String.format().
      */
-    void formatText(Object... format);
+    void formatNewText(String text, Object... format);
 
     /**
-     * Formats the text by the specified varargs, and applies it to the TextView widget.
-     * @param text the text to format and apply to the TextView widget.
+     * Formats the original widget text by the specified varargs, and applies it to the TextView widget.
      * @param format the format to apply to the original text, as specified by String.format().
      */
-    void formatText(CharSequence text, Object... format);
+    void formatOriginalText(Object... format);
 }
