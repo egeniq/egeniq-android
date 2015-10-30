@@ -58,7 +58,7 @@ public class TextView extends android.widget.TextView implements IFormattableTex
         _originalText = getText();
 
         //if unformatted text is available, show that text initially
-        if(context != null && attrs != null) {
+        if (context != null && attrs != null) {
             TypedArray styledAttrs = context.obtainStyledAttributes(attrs, R.styleable.TextView);
             String preformatText = styledAttrs.getString(R.styleable.TextView_preformat_text);
             setText(preformatText);
@@ -86,7 +86,7 @@ public class TextView extends android.widget.TextView implements IFormattableTex
     }
 
     @Override
-    public void formatNewText(String text, Object... format) {
+    public void formatNewText(CharSequence text, Object... format) {
         _originalText = text;
         formatOriginalText(format);
     }

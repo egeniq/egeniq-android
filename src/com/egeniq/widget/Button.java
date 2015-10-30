@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import com.egeniq.R;
 import com.egeniq.utils.loader.FontLoader;
@@ -57,7 +56,6 @@ public class Button extends android.widget.Button implements IFormattableTextVie
 
     private void _init(Context context, AttributeSet attrs) {
         _originalText = getText();
-        Log.d("button", _originalText.toString());
 
         //if unformatted text is available, show that text initially
         if (context != null && attrs != null) {
@@ -88,7 +86,7 @@ public class Button extends android.widget.Button implements IFormattableTextVie
     }
 
     @Override
-    public void formatNewText(String text, Object... format) {
+    public void formatNewText(CharSequence text, Object... format) {
         _originalText = text;
         formatOriginalText(format);
     }
