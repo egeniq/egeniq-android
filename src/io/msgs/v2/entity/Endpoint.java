@@ -113,6 +113,21 @@ public class Endpoint extends AbstractEntity {
     }
 
     /**
+     * Get Type
+     */
+    public DigestFrequency getDigestFrequency() {
+        return DigestFrequency.valueOf(_getString("endpoint_delivery_frequency").toUpperCase());
+    }
+
+    /**
+     * Set Type.
+     */
+    public Endpoint setDigestFrequency(DigestFrequency frequency) {
+        _putString("endpoint_delivery_frequency", frequency.toString().toLowerCase());
+        return this;
+    }
+
+    /**
      * Get Data.
      */
     public JSONObject getData() {
@@ -125,5 +140,9 @@ public class Endpoint extends AbstractEntity {
     public Endpoint setData(JSONObject data) {
         _putObject("data", data);
         return this;
+    }
+
+    public enum DigestFrequency {
+        DIRECT, DAILY, WEEKLY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY
     }
 }
