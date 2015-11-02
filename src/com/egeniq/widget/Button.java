@@ -61,7 +61,7 @@ public class Button extends android.widget.Button implements IFormattableTextVie
         if (context != null && attrs != null) {
             TypedArray styledAttrs = context.obtainStyledAttributes(attrs, R.styleable.TextView);
 
-            if(styledAttrs.hasValue(R.styleable.TextView_preformat_text)) {
+            if (styledAttrs != null && styledAttrs.hasValue(R.styleable.TextView_preformat_text)) {
                 String preformatText = styledAttrs.getString(R.styleable.TextView_preformat_text);
                 setText(preformatText);
             }
