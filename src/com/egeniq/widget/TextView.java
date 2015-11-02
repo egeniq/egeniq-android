@@ -60,8 +60,12 @@ public class TextView extends android.widget.TextView implements IFormattableTex
         //if preformat text is available, show that text initially
         if (context != null && attrs != null) {
             TypedArray styledAttrs = context.obtainStyledAttributes(attrs, R.styleable.TextView);
-            String preformatText = styledAttrs.getString(R.styleable.TextView_preformat_text);
-            setText(preformatText);
+
+            if(styledAttrs.hasValue(R.styleable.TextView_preformat_text)) {
+                String preformatText = styledAttrs.getString(R.styleable.TextView_preformat_text);
+                setText(preformatText);
+            }
+
             styledAttrs.recycle();
         }
     }

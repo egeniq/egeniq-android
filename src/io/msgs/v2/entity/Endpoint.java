@@ -15,7 +15,7 @@ public class Endpoint extends AbstractEntity {
 
     /**
      * Constructor.
-     * 
+     *
      * @param data
      */
     public Endpoint(JSONObject data) {
@@ -113,14 +113,14 @@ public class Endpoint extends AbstractEntity {
     }
 
     /**
-     * Get Type
+     * Get Digest frequency
      */
     public DigestFrequency getDigestFrequency() {
         return DigestFrequency.valueOf(_getString("endpoint_delivery_frequency").toUpperCase());
     }
 
     /**
-     * Set Type.
+     * Set Digest frequency
      */
     public Endpoint setDigestFrequency(DigestFrequency frequency) {
         _putString("endpoint_delivery_frequency", frequency.toString().toLowerCase());
