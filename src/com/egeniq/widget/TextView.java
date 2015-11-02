@@ -1,6 +1,7 @@
 package com.egeniq.widget;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 
@@ -26,7 +27,7 @@ public class TextView extends android.widget.TextView implements IFormattableTex
             return;
         }
 
-        _init();
+        _init(context, null);
     }
 
     /**
@@ -38,7 +39,7 @@ public class TextView extends android.widget.TextView implements IFormattableTex
             FontLoader.setCustomFont(this, context, attrs, R.styleable.TextView, R.styleable.TextView_font, _style);
         }
 
-        _init();
+        _init(context, attrs);
     }
 
     /**
@@ -50,11 +51,19 @@ public class TextView extends android.widget.TextView implements IFormattableTex
             FontLoader.setCustomFont(this, context, attrs, R.styleable.TextView, R.styleable.TextView_font, _style);
         }
 
-        _init();
+        _init(context, attrs);
     }
 
-    private void _init() {
+    private void _init(Context context, AttributeSet attrs) {
         _originalText = getText();
+
+        //if preformat text is available, show that text initially
+        if (context != null && attrs != null) {
+            TypedArray styledAttrs = context.obtainStyledAttributes(attrs, R.styleable.TextView);
+            String preformatText = styledAttrs.getString(R.styleable.TextView_preformat_text);
+            setText(preformatText);
+            styledAttrs.recycle();
+        }
     }
 
     /**
@@ -72,13 +81,13 @@ public class TextView extends android.widget.TextView implements IFormattableTex
     }
 
     @Override
-    public void formatText(Object... format) {
+    public void formatOriginalText(Object... format) {
         setText((_originalText != null) ? String.format(_originalText.toString(), format) : "");
     }
 
     @Override
-    public void formatText(CharSequence text, Object... format) {
+    public void formatNewText(CharSequence text, Object... format) {
         _originalText = text;
-        formatText(format);
+        formatOriginalText(format);
     }
 }
