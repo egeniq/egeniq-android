@@ -2,12 +2,10 @@
 <resources>
 
     <attr name="font" format="string" />
-    <attr name="preformat_text" format="string"/>
 
     <!-- TextView -->
     <declare-styleable name="TextView">
         <attr name="font" />
-        <attr name="preformat_text" />
     </declare-styleable>
 
 </resources>

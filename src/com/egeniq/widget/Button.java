@@ -13,10 +13,9 @@ import com.egeniq.utils.loader.FontLoader;
  *
  * @author Özcan Kaymak
  */
-public class Button extends android.widget.Button implements IFormattableTextView {
+public class Button extends android.widget.Button {
 
     private int _style;
-    private CharSequence _originalText;
 
     /**
      * Default constructor
@@ -26,8 +25,6 @@ public class Button extends android.widget.Button implements IFormattableTextVie
         if (isInEditMode()) {
             return;
         }
-
-        _init(context, null);
     }
 
     /**
@@ -38,8 +35,6 @@ public class Button extends android.widget.Button implements IFormattableTextVie
         if (!isInEditMode()) {
             FontLoader.setCustomFont(this, context, attrs, R.styleable.TextView, R.styleable.TextView_font, _style);
         }
-
-        _init(context, attrs);
     }
 
     /**
@@ -50,24 +45,6 @@ public class Button extends android.widget.Button implements IFormattableTextVie
         if (!isInEditMode()) {
             FontLoader.setCustomFont(this, context, attrs, R.styleable.TextView, R.styleable.TextView_font, _style);
         }
-
-        _init(context, attrs);
-    }
-
-    private void _init(Context context, AttributeSet attrs) {
-        _originalText = getText();
-
-        //if preformat text is available, show that text initially
-        if (context != null && attrs != null) {
-            TypedArray styledAttrs = context.obtainStyledAttributes(attrs, R.styleable.TextView);
-
-            if (styledAttrs != null && styledAttrs.hasValue(R.styleable.TextView_preformat_text)) {
-                String preformatText = styledAttrs.getString(R.styleable.TextView_preformat_text);
-                setText(preformatText);
-            }
-
-            styledAttrs.recycle();
-        }
     }
 
     /**
@@ -77,21 +54,5 @@ public class Button extends android.widget.Button implements IFormattableTextVie
     public void setTypeface(Typeface tf, int style) {
         super.setTypeface(tf, style);
         _style = style;
-    }
-
-    @Override
-    public CharSequence getOriginalText() {
-        return _originalText;
-    }
-
-    @Override
-    public void formatOriginalText(Object... format) {
-        setText((_originalText != null) ? String.format(_originalText.toString(), format) : "");
-    }
-
-    @Override
-    public void formatNewText(CharSequence text, Object... format) {
-        _originalText = text;
-        formatOriginalText(format);
     }
 }
