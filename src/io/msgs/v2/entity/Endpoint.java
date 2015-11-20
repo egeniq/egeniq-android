@@ -114,16 +114,21 @@ public class Endpoint extends AbstractEntity {
 
     /**
      * Get Digest frequency
+     *
+     * @return The frequency value stored in this endpoint
      */
-    public DigestFrequency getDigestFrequency() {
-        return DigestFrequency.valueOf(_getString("endpoint_delivery_frequency").toUpperCase());
+    public String getDigestFrequency() {
+        return _getString("endpointDeliveryFrequency");
     }
 
     /**
      * Set Digest frequency
+     * Valid values are determined at implementation
+     *
+     * @param frequency The frequency value to store for this endpoint
      */
-    public Endpoint setDigestFrequency(DigestFrequency frequency) {
-        _putString("endpoint_delivery_frequency", frequency.toString().toLowerCase());
+    public Endpoint setDigestFrequency(String frequency) {
+        _putString("endpointDeliveryFrequency", frequency);
         return this;
     }
 
@@ -140,9 +145,5 @@ public class Endpoint extends AbstractEntity {
     public Endpoint setData(JSONObject data) {
         _putObject("data", data);
         return this;
-    }
-
-    public enum DigestFrequency {
-        DIRECT, DAILY, WEEKLY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY
     }
 }
