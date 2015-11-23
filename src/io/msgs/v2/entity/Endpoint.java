@@ -113,22 +113,23 @@ public class Endpoint extends AbstractEntity {
     }
 
     /**
-     * Get Digest frequency
+     * Get delivery frequency
      *
      * @return The frequency value stored in this endpoint
      */
-    public String getDigestFrequency() {
-        return _getString("endpointDeliveryFrequency");
+    public String getDeliveryFrequency() {
+        return _getString("deliveryFrequency");
     }
 
     /**
-     * Set Digest frequency
-     * Valid values are determined at implementation
+     * Set delivery frequency
+     * Active values are determined at implementation
+     * Valid values: 'direct', 'daily', 'weekly', 'monday', tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'
      *
      * @param frequency The frequency value to store for this endpoint
      */
-    public Endpoint setDigestFrequency(String frequency) {
-        _putString("endpointDeliveryFrequency", frequency);
+    public Endpoint setDeliveryFrequency(String frequency) {
+        _putString("deliveryFrequency", frequency);
         return this;
     }
 
