@@ -7,7 +7,7 @@ buildscript {
     }
 }
 
-apply plugin: 'com.android.library'
+apply plugin: 'android-library'
 
 dependencies {
     compile files('libs/httpclientandroidlib-1.2.0.jar')
