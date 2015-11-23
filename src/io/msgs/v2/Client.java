@@ -1,30 +1,30 @@
 package io.msgs.v2;
 
-import io.msgs.v2.entity.Endpoint;
-import io.msgs.v2.entity.User;
+import android.util.Log;
+
+import com.egeniq.BuildConfig;
+import com.egeniq.utils.api.APIException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.util.Log;
 import ch.boye.httpclientandroidlib.Header;
 import ch.boye.httpclientandroidlib.NameValuePair;
 import ch.boye.httpclientandroidlib.client.entity.UrlEncodedFormEntity;
 import ch.boye.httpclientandroidlib.client.utils.URLEncodedUtils;
 import ch.boye.httpclientandroidlib.message.BasicHeader;
 import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
-
-import com.egeniq.BuildConfig;
-import com.egeniq.utils.api.APIException;
+import io.msgs.v2.entity.Endpoint;
+import io.msgs.v2.entity.User;
 
 /**
  * Msgs client.
- * 
+ *
  * All methods are executed synchronously. You are responsible for <br>
  * wrapping the calls in an AsyncTask or something similar.
  */
@@ -47,7 +47,7 @@ public class Client {
 
     /**
      * Constructor.
-     * 
+     *
      * @param context
      * @param baseURL
      * @param apiKey
@@ -59,7 +59,7 @@ public class Client {
 
     /**
      * Returns the API client.
-     * 
+     *
      * @return API client.
      */
     protected APIClient _getAPIClient() {
@@ -72,11 +72,9 @@ public class Client {
 
     /**
      * Register endpoint.
-     * 
+     *
      * @param properties
-     * 
      * @return Endpoint.
-     * 
      * @throws APIException
      */
     public Endpoint registerEndpoint(JSONObject data) throws APIException {
@@ -98,11 +96,9 @@ public class Client {
 
     /**
      * Register user.
-     * 
+     *
      * @param externalUserId
-     * 
      * @return User.
-     * 
      * @throws APIException
      */
     public User registerUser(JSONObject data) throws APIException {
@@ -124,7 +120,7 @@ public class Client {
 
     /**
      * User helper.
-     * 
+     *
      * @param token User token.
      */
     public UserRequestHelper forUser(String token) {
@@ -133,7 +129,7 @@ public class Client {
 
     /**
      * Endpoint helper.
-     * 
+     *
      * @param token Endpint token.
      */
     public EndpointRequestHelper forEndpoint(String token) {
@@ -149,9 +145,8 @@ public class Client {
 
     /**
      * Convert JSON object to name value pairs.
-     * 
+     *
      * @param properties
-     * 
      * @return Name value pairs.
      */
     protected List<NameValuePair> _getParams(JSONObject data) {
@@ -180,7 +175,7 @@ public class Client {
      * Perform a GET request with the ApiKey header.
      */
     protected JSONObject _get(String path, List<NameValuePair> params) throws APIException {
-        return _getAPIClient().get(path + (params != null && !params.isEmpty() ? "?" + URLEncodedUtils.format(params, "utf-8") : ""), true, new Header[] { _getApiHeader() });
+        return _getAPIClient().get(path + (params != null && !params.isEmpty() ? "?" + URLEncodedUtils.format(params, "utf-8") : ""), true, new Header[] {_getApiHeader()});
     }
 
     /**
@@ -188,7 +183,7 @@ public class Client {
      */
     protected JSONObject _post(String path, List<NameValuePair> params) throws APIException {
         try {
-            return _getAPIClient().post(path, params == null ? null : new UrlEncodedFormEntity(params, "utf-8"), true, new Header[] { _getApiHeader() });
+            return _getAPIClient().post(path, params == null ? null : new UrlEncodedFormEntity(params, "utf-8"), true, new Header[] {_getApiHeader()});
         } catch (UnsupportedEncodingException e) {
             return null;
         }
@@ -198,6 +193,6 @@ public class Client {
      * Perform a DELETE request with the ApiKey header.
      */
     protected JSONObject _delete(String path) throws APIException {
-        return _getAPIClient().delete(path, true, new Header[] { _getApiHeader() });
+        return _getAPIClient().delete(path, true, new Header[] {_getApiHeader()});
     }
 }
