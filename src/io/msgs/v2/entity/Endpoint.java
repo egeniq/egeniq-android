@@ -115,7 +115,7 @@ public class Endpoint extends AbstractEntity {
     /**
      * Get delivery frequency
      *
-     * @return The frequency value stored in this endpoint
+     * @return The frequency value stored for this endpoint
      */
     public String getDeliveryFrequency() {
         return _getString("deliveryFrequency");
@@ -123,7 +123,6 @@ public class Endpoint extends AbstractEntity {
 
     /**
      * Set delivery frequency
-     * Active values are determined at implementation
      * Valid values: 'direct', 'daily', 'weekly', 'monday', tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'
      *
      * @param frequency The frequency value to store for this endpoint
