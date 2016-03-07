@@ -1,21 +1,21 @@
 package io.msgs.v2;
 
-import io.msgs.v2.entity.ItemList;
-import io.msgs.v2.entity.Subscription;
+import android.text.TextUtils;
+import android.util.Log;
+
+import com.egeniq.BuildConfig;
+import com.egeniq.utils.api.APIException;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.json.JSONObject;
-
-import android.text.TextUtils;
-import android.util.Log;
-import ch.boye.httpclientandroidlib.NameValuePair;
-import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
-
-import com.egeniq.BuildConfig;
-import com.egeniq.utils.api.APIException;
+import io.msgs.v2.entity.ItemList;
+import io.msgs.v2.entity.Subscription;
 
 /**
  * Base RequestHelper

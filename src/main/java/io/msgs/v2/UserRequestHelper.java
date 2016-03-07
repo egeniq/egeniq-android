@@ -1,19 +1,19 @@
 package io.msgs.v2;
 
-import io.msgs.v2.entity.Endpoint;
-import io.msgs.v2.entity.ItemList;
+import android.util.Log;
+
+import com.egeniq.BuildConfig;
+import com.egeniq.utils.api.APIException;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONObject;
-
-import android.util.Log;
-import ch.boye.httpclientandroidlib.NameValuePair;
-import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
-
-import com.egeniq.BuildConfig;
-import com.egeniq.utils.api.APIException;
+import io.msgs.v2.entity.Endpoint;
+import io.msgs.v2.entity.ItemList;
 
 /**
  * Request Helper for User.
@@ -32,7 +32,7 @@ public class UserRequestHelper extends RequestHelper {
     /**
      * Register endpoint.
      * 
-     * @param properties
+     * @param data
      * 
      * @return Endpoint.
      * 
@@ -57,9 +57,9 @@ public class UserRequestHelper extends RequestHelper {
 
     /**
      * Get Endpoints.
-     * 
-     * @param sort Optional. Pass <b>null</b> to use default value.
+     *
      * @param limit Optional. Pass <b>null</b> to use default value.
+     * @param offset Optional. Pass <b>null</b> to use default value.
      */
     public ItemList<Endpoint> fetchEndpoints(Integer limit, Integer offset) throws APIException {
         try {

@@ -5,6 +5,12 @@ import android.util.Log;
 import com.egeniq.BuildConfig;
 import com.egeniq.utils.api.APIException;
 
+import org.apache.http.Header;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -13,12 +19,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import ch.boye.httpclientandroidlib.Header;
-import ch.boye.httpclientandroidlib.NameValuePair;
-import ch.boye.httpclientandroidlib.client.entity.UrlEncodedFormEntity;
-import ch.boye.httpclientandroidlib.client.utils.URLEncodedUtils;
-import ch.boye.httpclientandroidlib.message.BasicHeader;
-import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
 import io.msgs.v2.entity.Endpoint;
 import io.msgs.v2.entity.User;
 
@@ -48,7 +48,6 @@ public class Client {
     /**
      * Constructor.
      *
-     * @param context
      * @param baseURL
      * @param apiKey
      */
@@ -73,7 +72,7 @@ public class Client {
     /**
      * Register endpoint.
      *
-     * @param properties
+     * @param data
      * @return Endpoint.
      * @throws APIException
      */
@@ -97,7 +96,7 @@ public class Client {
     /**
      * Register user.
      *
-     * @param externalUserId
+     * @param data
      * @return User.
      * @throws APIException
      */
@@ -146,7 +145,7 @@ public class Client {
     /**
      * Convert JSON object to name value pairs.
      *
-     * @param properties
+     * @param data
      * @return Name value pairs.
      */
     protected List<NameValuePair> _getParams(JSONObject data) {

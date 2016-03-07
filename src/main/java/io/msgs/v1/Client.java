@@ -1,30 +1,31 @@
 package io.msgs.v1;
 
-import io.msgs.v1.Subscription.Time;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.util.Log;
+
+import com.egeniq.BuildConfig;
+import com.egeniq.utils.api.APIClient;
+import com.egeniq.utils.api.APIException;
+import com.egeniq.utils.api.APIUtils;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.net.Uri;
-import android.util.Log;
-import ch.boye.httpclientandroidlib.HttpEntity;
-import ch.boye.httpclientandroidlib.NameValuePair;
-import ch.boye.httpclientandroidlib.client.entity.UrlEncodedFormEntity;
-import ch.boye.httpclientandroidlib.message.BasicNameValuePair;
-
-import com.egeniq.BuildConfig;
-import com.egeniq.utils.api.APIClient;
-import com.egeniq.utils.api.APIException;
-import com.egeniq.utils.api.APIUtils;
+import io.msgs.v1.Subscription.Time;
 
 /**
  * Notification client.
