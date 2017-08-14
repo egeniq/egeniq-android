@@ -9,6 +9,8 @@ import android.text.style.DynamicDrawableSpan;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.TextAppearanceSpan;
 import android.util.AttributeSet;
+import android.widget.TextView;
+
 
 import com.egeniq.utils.loader.FontLoader;
 
