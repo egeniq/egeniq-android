@@ -1,10 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.egeniq"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionCode="10"
+    android:versionName="1.1.0" >
 
     <uses-sdk
-        android:minSdkVersion="8"
-        android:targetSdkVersion="17" />
+        android:minSdkVersion="14"
+        android:targetSdkVersion="126" />
 
 </manifest>
