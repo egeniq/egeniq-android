@@ -51,7 +51,7 @@ public class SpannableTextView extends TextView {
      * Clears the content of the SpannableTextView.
      */
     public void clear() {
-        _markupList = new ArrayList<MarkupData>();
+        _markupList = new ArrayList<>();
         _markupText = "";
     }
 
@@ -97,7 +97,7 @@ public class SpannableTextView extends TextView {
      */
     public void append(int style, String text) {
 
-        int[] attrs = {com.egeniq.R.attr.font};
+        int[] attrs = {com.egeniq.R.attr.egeniq_font};
         TypedArray styleArray = getContext().obtainStyledAttributes(style, attrs);
         boolean customFontFound = false;
         if (styleArray.length() > 0) {
@@ -114,7 +114,7 @@ public class SpannableTextView extends TextView {
             }
         }
 
-        if (customFontFound == false) {
+        if (!customFontFound) {
             TextAppearanceSpan textAppearanceSpan = new TextAppearanceSpan(getContext(), style);
             _markupList.add(new MarkupData(text, textAppearanceSpan));
         }
